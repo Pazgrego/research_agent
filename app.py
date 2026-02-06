@@ -88,11 +88,11 @@ def analyze_pdf(text: str, api_key: str) -> CASPArticleEvaluation:
     genai.configure(api_key=api_key)
 
     model = genai.GenerativeModel(
-        model_name="gemini-1.5-flash",
-        system_instruction=SYSTEM_PROMPT,
+        model_name="models/gemini-1.5-flash",
     )
 
     prompt = (
+        f"{SYSTEM_PROMPT}\n\n"
         "Analyze the following scientific article and produce the CASP / GRADE / PICO "
         "evaluation as a single JSON object.\n\n"
         "Your response MUST conform EXACTLY to this JSON Schema:\n"
@@ -102,7 +102,7 @@ def analyze_pdf(text: str, api_key: str) -> CASPArticleEvaluation:
 
     response = model.generate_content(
         prompt,
-        generation_config={"response_mime_type": "application/json", "temperature": 0.2},
+        generation_config={"response_mime_type": "application/json"},
     )
 
     raw_json = json.loads(response.text)
