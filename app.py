@@ -1,7 +1,8 @@
 import streamlit as st
 import pdfplumber
 import json
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from schema import CASPArticleEvaluation
 
 
@@ -85,10 +86,9 @@ def _get_json_schema() -> str:
 
 def analyze_pdf(text: str, api_key: str) -> CASPArticleEvaluation:
     """Send extracted text to Gemini 1.5 Flash and return a validated evaluation."""
-    genai.configure(api_key=api_key)
-
-    model = genai.GenerativeModel(
-        model_name="gemini-1.5-flash",
+    client = genai.Client(
+        api_key=api_key,
+        http_options=types.HttpOptions(apiVersion="v1beta"),
     )
 
     prompt = (
@@ -100,10 +100,14 @@ def analyze_pdf(text: str, api_key: str) -> CASPArticleEvaluation:
         f"--- BEGIN ARTICLE TEXT ---\n{text}\n--- END ARTICLE TEXT ---"
     )
 
-    response = model.generate_content(
-        prompt,
-        generation_config={"response_mime_type": "application/json"},
-        request_options={"api_version": "v1"},
+    response = client.models.generate_content(
+        model="gemini-1.5-flash-latest",
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            responseMimeType="application/json",
+            responseSchema=CASPArticleEvaluation,
+            temperature=0.2,
+        ),
     )
 
     raw_json = json.loads(response.text)
