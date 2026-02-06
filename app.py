@@ -88,7 +88,7 @@ def analyze_pdf(text: str, api_key: str) -> CASPArticleEvaluation:
     genai.configure(api_key=api_key)
 
     model = genai.GenerativeModel(
-        model_name="models/gemini-1.5-flash",
+        model_name="gemini-1.5-flash",
     )
 
     prompt = (
@@ -103,6 +103,7 @@ def analyze_pdf(text: str, api_key: str) -> CASPArticleEvaluation:
     response = model.generate_content(
         prompt,
         generation_config={"response_mime_type": "application/json"},
+        request_options={"api_version": "v1"},
     )
 
     raw_json = json.loads(response.text)
