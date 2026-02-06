@@ -83,7 +83,7 @@ def analyze_pdf(text: str, api_key: str) -> CASPArticleEvaluation:
     genai.configure(api_key=api_key)
 
     model = genai.GenerativeModel(
-        model_name="gemini-1.5-pro",
+        model_name="gemini-1.5-flash",
         generation_config=genai.GenerationConfig(
             response_mime_type="application/json",
             response_schema=CASPArticleEvaluation,
@@ -130,7 +130,7 @@ def main():
     st.title("🔬 Scientific PDF Analyzer")
     st.markdown(
         "Upload a scientific PDF and get an automated **CASP / GRADE / PICO** "
-        "quality evaluation powered by **Google Gemini 1.5 Pro**."
+        "quality evaluation powered by **Google Gemini 1.5 Flash**."
     )
 
     # ---- Sidebar ----
@@ -173,7 +173,7 @@ def main():
                 st.error("Please enter your Google API key in the sidebar.")
                 return
 
-            with st.spinner("Analyzing with Gemini 1.5 Pro — this may take a minute…"):
+            with st.spinner("Analyzing with Gemini 1.5 Flash — this may take a minute…"):
                 try:
                     evaluation = analyze_pdf(pdf_text, api_key)
                 except Exception as exc:
