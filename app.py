@@ -78,23 +78,31 @@ def extract_text_from_pdf(uploaded_file) -> str:
     return "\n\n".join(text_parts)
 
 
+def _get_json_schema() -> str:
+    """Return the JSON schema string derived from the Pydantic root model."""
+    return json.dumps(CASPArticleEvaluation.model_json_schema(), indent=2)
+
+
 def analyze_pdf(text: str, api_key: str) -> CASPArticleEvaluation:
     """Send extracted text to Gemini 1.5 Flash and return a validated evaluation."""
-    genai.configure(api_key=api_key, transport="rest")
+    genai.configure(api_key=api_key)
 
     model = genai.GenerativeModel(
         model_name="gemini-1.5-flash",
-        generation_config={
-            "response_mime_type": "application/json",
-            "response_schema": CASPArticleEvaluation,
-            "temperature": 0.2,
-        },
         system_instruction=SYSTEM_PROMPT,
     )
 
-    response = model.generate_content(
-        f"Analyze the following scientific article and produce the CASP / GRADE / PICO evaluation JSON.\n\n"
+    prompt = (
+        "Analyze the following scientific article and produce the CASP / GRADE / PICO "
+        "evaluation as a single JSON object.\n\n"
+        "Your response MUST conform EXACTLY to this JSON Schema:\n"
+        f"```\n{_get_json_schema()}\n```\n\n"
         f"--- BEGIN ARTICLE TEXT ---\n{text}\n--- END ARTICLE TEXT ---"
+    )
+
+    response = model.generate_content(
+        prompt,
+        generation_config={"response_mime_type": "application/json", "temperature": 0.2},
     )
 
     raw_json = json.loads(response.text)
