@@ -47,32 +47,58 @@ Scoring rules
 ─────────────
 CRITICAL: Follow this EXACT step-by-step calculation process for deterministic results:
 
-STEP 1: Score each CASP question (Q1-Q11)
-• Each question "score" is a float between 0.0 and 1.0 inclusive
-  (0 = not met, 0.5 = partial, 1.0 = fully met).
-• For question 11 (benefits_worth_harms), "score" is a string: use a numeric
-  string like "0.5" when applicable, or "N/A" when not applicable.
-• Be consistent: use the same criteria for the same types of issues across papers.
+STRICT MATHEMATICAL SCORING RUBRIC (100-point scale):
+──────────────────────────────────────────────────────
+You must follow this fixed point allocation:
 
-STEP 2: Calculate total_score
-• Sum all numeric scores from Q1-Q11
-• If Q11 is "N/A", exclude it from both total_score and total_applicable_questions
-• total_applicable_questions = 11 (or 10 if Q11 is N/A)
+1. Methodology Quality (CASP): 40 points maximum
+   - Based on CASP checklist questions (validity, randomization, blinding, etc.)
+   - Each CASP question contributes proportionally to these 40 points
 
-STEP 3: Calculate percentage_score
-• percentage_score = (total_score / total_applicable_questions) × 100
-• It must be between 0 and 100
-• Round to 1 decimal place
+2. Evidence Strength (GRADE): 40 points maximum
+   - High certainty: 35-40 points
+   - Moderate certainty: 25-34 points
+   - Low certainty: 15-24 points
+   - Very low certainty: 0-14 points
+   - SPECIAL RULE: For studies with N<10 in human samples, automatically deduct 15 points
+     (e.g., Suez et al. 2014 with N=7: maximum GRADE = 25 points)
 
-STEP 4: Assign quality_rating based on EXACT thresholds
+3. Clinical Relevance (PICO): 20 points maximum
+   - Clear, focused PICO: 18-20 points
+   - Partially clear PICO: 10-17 points
+   - Unclear/weak PICO: 0-9 points
+
+CALCULATION STEPS:
+──────────────────
+
+STEP 1: Assign points for each category
+• Methodology (CASP): 0-40 points based on checklist performance
+• Evidence Strength (GRADE): 0-40 points (remember: -15 if N<10 humans)
+• Clinical Relevance (PICO): 0-20 points based on clarity and focus
+
+STEP 2: Calculate total points
+• total_points = CASP_points + GRADE_points + PICO_points
+• Maximum possible = 100 points
+
+STEP 3: Convert to percentage_score
+• percentage_score = total_points (it's already a percentage!)
+• Must be between 0 and 100
+
+STEP 4: Map CASP questions to 0-1 scores (for schema compatibility)
+• Each CASP question gets a score between 0.0 and 1.0
+  (0 = not met, 0.5 = partial, 1.0 = fully met)
+• total_score = sum of all CASP question scores
+• total_applicable_questions = number of CASP questions answered (10 or 11)
+
+STEP 5: Assign quality_rating based on percentage_score
 • LOW: percentage_score < 40
 • MODERATE: 40 ≤ percentage_score < 65
 • MODERATE_TO_HIGH: 65 ≤ percentage_score < 80
 • HIGH: percentage_score ≥ 80
 
-STEP 5: Verify your math
-• Double-check: (total_score / total_applicable_questions) × 100 = percentage_score
-• Ensure quality_rating matches the threshold
+STEP 6: Verify consistency
+• Ensure percentage_score matches your point allocation
+• Verify quality_rating matches the threshold
 • bradford_hill_criteria_met is an integer from 0 to 9 based on causality evidence
 
 Field guidance
@@ -127,11 +153,13 @@ def analyze_pdf(text: str, api_key: str) -> CASPArticleEvaluation:
         model=MODEL_NAME,
         contents=prompt,
         config=types.GenerateContentConfig(
+            temperature=0,
+            topP=1,
+            topK=1,
+            maxOutputTokens=2048,
             responseMimeType="application/json",
             # responseSchema removed - too complex for Gemini's constraints
             # Schema is embedded in prompt and validated via Pydantic after
-            temperature=0.0,  # Maximum determinism for consistent evaluations
-            topP=1.0,         # Use all tokens (no randomness)
         ),
     )
 
