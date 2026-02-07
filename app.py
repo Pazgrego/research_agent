@@ -156,14 +156,20 @@ def analyze_pdf(text: str, api_key: str) -> CASPArticleEvaluation:
             temperature=0,
             topP=1,
             topK=1,
-            maxOutputTokens=2048,
+            maxOutputTokens=8192,  # Increased for large JSON output
             responseMimeType="application/json",
             # responseSchema removed - too complex for Gemini's constraints
             # Schema is embedded in prompt and validated via Pydantic after
         ),
     )
 
-    raw_json = json.loads(response.text)
+    try:
+        raw_json = json.loads(response.text)
+    except json.JSONDecodeError as e:
+        # If JSON is malformed, show the error and first 500 chars
+        error_msg = f"JSON parsing failed: {e}\n\nReceived text (first 500 chars):\n{response.text[:500]}"
+        raise ValueError(error_msg)
+    
     evaluation = CASPArticleEvaluation(**raw_json)
     return evaluation
 
