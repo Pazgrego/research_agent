@@ -55,7 +55,7 @@ class ArticleMetadata(BaseModel):
     publication_year: int
     doi: str
     study_type: str
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 # PICO Structure
@@ -64,7 +64,7 @@ class PICODetails(BaseModel):
     intervention: str
     comparator: str
     outcomes: str
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 # Question 1: Focused Issue
@@ -73,8 +73,8 @@ class FocusedIssueQuestion(BaseModel):
     answer: AnswerType
     details: PICODetails
     score: float
-    notes: Optional[str]
-    limitations_found: Optional[List[str]]
+    notes: Optional[str] = None
+    limitations_found: Optional[List[str]] = None
 
 
 # Question 2: Randomization
@@ -82,7 +82,7 @@ class RandomizationDetails(BaseModel):
     mice_studies: str
     human_intervention: str
     human_observational: str
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 class RandomizationQuestion(BaseModel):
@@ -91,14 +91,14 @@ class RandomizationQuestion(BaseModel):
     details: RandomizationDetails
     score: float
     concerns: List[str]
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 # Question 3: Patient Accounting
 class PatientAccountingDetails(BaseModel):
     mice: str
     humans: str
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 class PatientAccountingQuestion(BaseModel):
@@ -106,15 +106,15 @@ class PatientAccountingQuestion(BaseModel):
     answer: AnswerType
     details: PatientAccountingDetails
     score: float
-    notes: Optional[str]
-    limitations_found: Optional[List[str]]
+    notes: Optional[str] = None
+    limitations_found: Optional[List[str]] = None
 
 
 # Preliminary Assessment
 class PreliminaryAssessment(BaseModel):
     worth_continuing: bool
     rationale: str
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 # Section A: Validity
@@ -123,7 +123,7 @@ class SectionAValidity(BaseModel):
     question_2_randomization: RandomizationQuestion
     question_3_all_patients_accounted: PatientAccountingQuestion
     preliminary_assessment: PreliminaryAssessment
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 # Question 4: Blinding
@@ -131,7 +131,7 @@ class BlindingDetails(BaseModel):
     patients_blinded: bool
     personnel_blinded: bool
     explicit_statement: str
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 class BlindingQuestion(BaseModel):
@@ -141,7 +141,7 @@ class BlindingQuestion(BaseModel):
     score: float
     bias_risk: RiskLevel
     concerns: List[str]
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 # Question 5: Group Similarity
@@ -149,7 +149,7 @@ class GroupSimilarityDetails(BaseModel):
     baseline_characteristics: str
     human_baseline: str
     baseline_measurements: str
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 class GroupSimilarityQuestion(BaseModel):
@@ -157,8 +157,8 @@ class GroupSimilarityQuestion(BaseModel):
     answer: AnswerType
     details: GroupSimilarityDetails
     score: float
-    notes: Optional[str]
-    limitations_found: Optional[List[str]]
+    notes: Optional[str] = None
+    limitations_found: Optional[List[str]] = None
 
 
 # Question 6: Equal Treatment
@@ -166,7 +166,7 @@ class EqualTreatmentDetails(BaseModel):
     same_diet_batch: str
     same_housing: str
     same_testing: str
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 class EqualTreatmentQuestion(BaseModel):
@@ -174,7 +174,7 @@ class EqualTreatmentQuestion(BaseModel):
     answer: AnswerType
     details: EqualTreatmentDetails
     score: float
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 # Question 7: Effect Size
@@ -182,26 +182,26 @@ class OutcomeMeasurement(BaseModel):
     metric: str
     statistical_significance: str
     effect_description: str
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 class MechanisticOutcomes(BaseModel):
     microbiota_transfer: str
     antibiotic_reversal: str
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 class HumanOutcomeMeasurement(BaseModel):
     observational: str
     intervention: str
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 class EffectSizeDetails(BaseModel):
     primary_outcome_mice: OutcomeMeasurement
     primary_outcome_humans: HumanOutcomeMeasurement
     mechanistic_outcomes: MechanisticOutcomes
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 class EffectSizeQuestion(BaseModel):
@@ -209,7 +209,7 @@ class EffectSizeQuestion(BaseModel):
     answer: EffectSizeLevel
     details: EffectSizeDetails
     score: float
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 # Question 8: Precision
@@ -217,7 +217,7 @@ class SampleSizes(BaseModel):
     mice_groups: str
     human_observational: str
     human_intervention: str
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 class PrecisionDetails(BaseModel):
@@ -225,7 +225,7 @@ class PrecisionDetails(BaseModel):
     p_values: str
     sample_sizes: SampleSizes
     error_reporting: str
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 class PrecisionQuestion(BaseModel):
@@ -234,7 +234,7 @@ class PrecisionQuestion(BaseModel):
     details: PrecisionDetails
     score: float
     concerns: List[str]
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 # Section B: Results
@@ -244,14 +244,14 @@ class SectionBResults(BaseModel):
     question_6_treated_equally: EqualTreatmentQuestion
     question_7_effect_size: EffectSizeQuestion
     question_8_precision: PrecisionQuestion
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 # Question 9: Applicability
 class ApplicabilityDetails(BaseModel):
     generalizability_limitations: List[str]
     strengths: List[str]
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 class ApplicabilityQuestion(BaseModel):
@@ -259,14 +259,14 @@ class ApplicabilityQuestion(BaseModel):
     answer: AnswerType
     details: ApplicabilityDetails
     score: float
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 # Question 10: Important Outcomes
 class OutcomesConsideredDetails(BaseModel):
     outcomes_measured: List[str]
     outcomes_missing: List[str]
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 class OutcomesConsideredQuestion(BaseModel):
@@ -274,7 +274,7 @@ class OutcomesConsideredQuestion(BaseModel):
     answer: AnswerType
     details: OutcomesConsideredDetails
     score: float
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 # Question 11: Benefits vs Harms
@@ -282,7 +282,7 @@ class BenefitsHarmsDetails(BaseModel):
     type: str
     findings_suggest: str
     clinical_implications: str
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 class BenefitsHarmsQuestion(BaseModel):
@@ -290,7 +290,7 @@ class BenefitsHarmsQuestion(BaseModel):
     answer: AnswerType
     details: BenefitsHarmsDetails
     score: str
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 # Section C: Applicability
@@ -298,7 +298,7 @@ class SectionCApplicability(BaseModel):
     question_9_results_applicable: ApplicabilityQuestion
     question_10_outcomes_considered: OutcomesConsideredQuestion
     question_11_benefits_worth_harms: BenefitsHarmsQuestion
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 # Main CASP Evaluation
@@ -308,14 +308,14 @@ class CASPEvaluation(BaseModel):
     section_a_validity: SectionAValidity
     section_b_results: SectionBResults
     section_c_applicability: SectionCApplicability
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 # Additional Quality Assessment Models
 class BiasAssessment(BaseModel):
     risk: RiskLevel
     notes: str
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 class InternalValidity(BaseModel):
@@ -324,14 +324,14 @@ class InternalValidity(BaseModel):
     detection_bias: BiasAssessment
     attrition_bias: BiasAssessment
     reporting_bias: BiasAssessment
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 class ExternalValidity(BaseModel):
     animal_to_human_translation: str
     population_representativeness: str
     intervention_feasibility: str
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 class StatisticalRigor(BaseModel):
@@ -339,13 +339,13 @@ class StatisticalRigor(BaseModel):
     multiple_testing_correction: str
     sample_size_justification: str
     power_calculation: str
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 class MechanisticStrength(BaseModel):
     causality_evidence: List[str]
     bradford_hill_criteria_met: int
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 class AdditionalQualityAssessment(BaseModel):
@@ -353,7 +353,7 @@ class AdditionalQualityAssessment(BaseModel):
     external_validity: ExternalValidity
     statistical_rigor: StatisticalRigor
     mechanistic_strength: MechanisticStrength
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 # Overall Assessment
@@ -366,7 +366,7 @@ class OverallAssessment(BaseModel):
     key_limitations: List[str]
     reliability_conclusion: str
     recommendations: List[str]
-    limitations_found: Optional[List[str]]
+    limitations_found: Optional[List[str]] = None
 
 
 # Root Model
