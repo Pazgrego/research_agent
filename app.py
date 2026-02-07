@@ -7,6 +7,12 @@ from schema import CASPArticleEvaluation
 
 
 # ---------------------------------------------------------------------------
+# Configuration
+# ---------------------------------------------------------------------------
+MODEL_NAME = "gemini-2.5-flash"
+
+
+# ---------------------------------------------------------------------------
 # Prompt
 # ---------------------------------------------------------------------------
 SYSTEM_PROMPT = """\
@@ -98,7 +104,7 @@ def analyze_pdf(text: str, api_key: str) -> CASPArticleEvaluation:
     )
 
     response = client.models.generate_content(
-        model="gemini-flash-latest",
+        model=MODEL_NAME,
         contents=prompt,
         config=types.GenerateContentConfig(
             responseMimeType="application/json",
