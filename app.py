@@ -108,7 +108,8 @@ def analyze_pdf(text: str, api_key: str) -> CASPArticleEvaluation:
         contents=prompt,
         config=types.GenerateContentConfig(
             responseMimeType="application/json",
-            responseSchema=CASPArticleEvaluation,
+            # responseSchema removed - too complex for Gemini's constraints
+            # Schema is embedded in prompt and validated via Pydantic after
             temperature=0.2,
         ),
     )
