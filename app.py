@@ -45,15 +45,35 @@ CASP Question texts (use these EXACT strings for each "question" field)
 
 Scoring rules
 ─────────────
+CRITICAL: Follow this EXACT step-by-step calculation process for deterministic results:
+
+STEP 1: Score each CASP question (Q1-Q11)
 • Each question "score" is a float between 0.0 and 1.0 inclusive
   (0 = not met, 0.5 = partial, 1.0 = fully met).
 • For question 11 (benefits_worth_harms), "score" is a string: use a numeric
   string like "0.5" when applicable, or "N/A" when not applicable.
-• percentage_score = (total_score / total_applicable_questions) × 100.
-  It must be between 0 and 100.
-• quality_rating thresholds: LOW < 40, MODERATE 40‑64, MODERATE_TO_HIGH 65‑79,
-  HIGH ≥ 80.
-• bradford_hill_criteria_met is an integer from 0 to 9.
+• Be consistent: use the same criteria for the same types of issues across papers.
+
+STEP 2: Calculate total_score
+• Sum all numeric scores from Q1-Q11
+• If Q11 is "N/A", exclude it from both total_score and total_applicable_questions
+• total_applicable_questions = 11 (or 10 if Q11 is N/A)
+
+STEP 3: Calculate percentage_score
+• percentage_score = (total_score / total_applicable_questions) × 100
+• It must be between 0 and 100
+• Round to 1 decimal place
+
+STEP 4: Assign quality_rating based on EXACT thresholds
+• LOW: percentage_score < 40
+• MODERATE: 40 ≤ percentage_score < 65
+• MODERATE_TO_HIGH: 65 ≤ percentage_score < 80
+• HIGH: percentage_score ≥ 80
+
+STEP 5: Verify your math
+• Double-check: (total_score / total_applicable_questions) × 100 = percentage_score
+• Ensure quality_rating matches the threshold
+• bradford_hill_criteria_met is an integer from 0 to 9 based on causality evidence
 
 Field guidance
 ──────────────
@@ -110,7 +130,8 @@ def analyze_pdf(text: str, api_key: str) -> CASPArticleEvaluation:
             responseMimeType="application/json",
             # responseSchema removed - too complex for Gemini's constraints
             # Schema is embedded in prompt and validated via Pydantic after
-            temperature=0.2,
+            temperature=0.0,  # Maximum determinism for consistent evaluations
+            topP=1.0,         # Use all tokens (no randomness)
         ),
     )
 
