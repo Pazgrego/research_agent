@@ -85,11 +85,8 @@ def _get_json_schema() -> str:
 
 
 def analyze_pdf(text: str, api_key: str) -> CASPArticleEvaluation:
-    """Send extracted text to Gemini 1.5 Flash and return a validated evaluation."""
-    client = genai.Client(
-        api_key=api_key,
-        http_options=types.HttpOptions(apiVersion="v1beta"),
-    )
+    """Send extracted text to Gemini Flash and return a validated evaluation."""
+    client = genai.Client(api_key=api_key)
 
     prompt = (
         f"{SYSTEM_PROMPT}\n\n"
@@ -101,7 +98,7 @@ def analyze_pdf(text: str, api_key: str) -> CASPArticleEvaluation:
     )
 
     response = client.models.generate_content(
-        model="gemini-1.5-flash-latest",
+        model="gemini-flash-latest",
         contents=prompt,
         config=types.GenerateContentConfig(
             responseMimeType="application/json",
