@@ -41,10 +41,18 @@ IF ORIGINAL_ARTICLE:
   • PICO: Define clinical question structure
 
 IF SYSTEMATIC_REVIEW:
-  frameworks_applied = ["AMSTAR_2", "PRISMA", "GRADE"]
+  frameworks_applied = ["AMSTAR_2", "PRISMA", "GRADE", "CASP"]
   • AMSTAR 2: Critical appraisal of systematic review process (16 items)
   • PRISMA: Reporting transparency (27-item checklist)
   • GRADE: Quality of the body of evidence synthesized
+  • CASP: Use CASP Systematic Review checklist (adapt questions)
+  
+  IMPORTANT for Systematic Reviews:
+  • Effect size (Q7): Answer can be "VARIES" or "PARTIAL" if studies show heterogeneous results
+  • Precision (Q8): Answer can be "VARIES" or "PARTIAL" if confidence intervals differ across studies
+  • For Q7 and Q8, describe the RANGE of effect sizes/precision across included studies
+  • Example Q7 answer: "VARIES - effect sizes range from small (d=0.2) to large (d=0.8)"
+  • Example Q8 answer: "PARTIAL - some studies report narrow CIs, others report wide CIs or only p-values"
 
 IF NARRATIVE_REVIEW:
   frameworks_applied = ["SANRA", "PICO_SCOPE"]
@@ -73,6 +81,13 @@ Scoring (0.0 to 1.0 per question):
   • 1.0 = Fully met with clear evidence
   • 0.5 = Partially met or unclear
   • 0.0 = Not met or serious concerns
+
+Answer types for Q1-Q11:
+  • "YES", "NO", "PARTIAL", "NOT_APPLICABLE", "UNCLEAR"
+  • For Q7 (effect size): Can also use "LARGE", "MODERATE", "SMALL", "NONE", "VARIES"
+  • For Q8 (precision): Can also use "HIGH", "MODERATE", "LOW", "VARIES"
+  • For systematic reviews: "VARIES" indicates heterogeneity across included studies
+  • For systematic reviews: "PARTIAL" indicates some studies meet criteria, others don't
 
 ═══════════════════════════════════════════════════════════════════════════
 GRADE CERTAINTY OF EVIDENCE
