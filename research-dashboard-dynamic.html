@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Analysis Dashboard - Dynamic</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState } = React;
+        
+        // Icons (same as before)
+        const CheckCircle = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        );
+        
+        const AlertTriangle = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+        );
+        
+        const FileText = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+        );
+        
+        const Beaker = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+            </svg>
+        );
+        
+        const Users = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+        );
+        
+        const TrendingUp = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+        );
+        
+        const ChevronDown = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+        );
+        
+        const ChevronUp = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+            </svg>
+        );
+        
+        const Activity = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+        );
+        
+        const Target = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        );
+        
+        const Award = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+            </svg>
+        );
+
+        const Upload = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+        );
+
+const App = () => {
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
+  const [jsonInput, setJsonInput] = useState('');
+  const [rawData, setRawData] = useState(null);
+
+  // Transform Pydantic JSON to dashboard format
+  const transformData = (pydanticJson) => {
+    try {
+      console.log('Received JSON:', pydanticJson);
+      
+      // Extract all CASP questions
+      const casp = pydanticJson.casp_evaluation;
+      const validity = [
+        { 
+          question: casp.section_a_validity.question_1_focused_issue.question,
+          answer: casp.section_a_validity.question_1_focused_issue.answer,
+          score: casp.section_a_validity.question_1_focused_issue.score,
+          notes: casp.section_a_validity.question_1_focused_issue.notes
+        },
+        { 
+          question: casp.section_a_validity.question_2_randomization.question,
+          answer: casp.section_a_validity.question_2_randomization.answer,
+          score: casp.section_a_validity.question_2_randomization.score,
+          concerns: casp.section_a_validity.question_2_randomization.concerns,
+          notes: casp.section_a_validity.question_2_randomization.notes
+        },
+        { 
+          question: casp.section_a_validity.question_3_all_patients_accounted.question,
+          answer: casp.section_a_validity.question_3_all_patients_accounted.answer,
+          score: casp.section_a_validity.question_3_all_patients_accounted.score,
+          notes: casp.section_a_validity.question_3_all_patients_accounted.notes
+        }
+      ];
+
+      const results = [
+        { 
+          question: casp.section_b_results.question_4_blinding.question,
+          answer: casp.section_b_results.question_4_blinding.answer,
+          score: casp.section_b_results.question_4_blinding.score,
+          biasRisk: casp.section_b_results.question_4_blinding.bias_risk,
+          concerns: casp.section_b_results.question_4_blinding.concerns,
+          notes: casp.section_b_results.question_4_blinding.notes
+        },
+        { 
+          question: casp.section_b_results.question_5_groups_similar.question,
+          answer: casp.section_b_results.question_5_groups_similar.answer,
+          score: casp.section_b_results.question_5_groups_similar.score,
+          notes: casp.section_b_results.question_5_groups_similar.notes
+        },
+        { 
+          question: casp.section_b_results.question_6_treated_equally.question,
+          answer: casp.section_b_results.question_6_treated_equally.answer,
+          score: casp.section_b_results.question_6_treated_equally.score,
+          notes: casp.section_b_results.question_6_treated_equally.notes
+        },
+        { 
+          question: casp.section_b_results.question_7_effect_size.question,
+          answer: casp.section_b_results.question_7_effect_size.answer,
+          score: casp.section_b_results.question_7_effect_size.score,
+          notes: casp.section_b_results.question_7_effect_size.notes
+        },
+        { 
+          question: casp.section_b_results.question_8_precision.question,
+          answer: casp.section_b_results.question_8_precision.answer,
+          score: casp.section_b_results.question_8_precision.score,
+          concerns: casp.section_b_results.question_8_precision.concerns,
+          notes: casp.section_b_results.question_8_precision.notes
+        },
+        { 
+          question: casp.section_c_applicability.question_9_results_applicable.question,
+          answer: casp.section_c_applicability.question_9_results_applicable.answer,
+          score: casp.section_c_applicability.question_9_results_applicable.score,
+          notes: casp.section_c_applicability.question_9_results_applicable.notes
+        },
+        { 
+          question: casp.section_c_applicability.question_10_outcomes_considered.question,
+          answer: casp.section_c_applicability.question_10_outcomes_considered.answer,
+          score: casp.section_c_applicability.question_10_outcomes_considered.score,
+          notes: casp.section_c_applicability.question_10_outcomes_considered.notes
+        },
+        { 
+          question: casp.section_c_applicability.question_11_benefits_worth_harms.question,
+          answer: casp.section_c_applicability.question_11_benefits_worth_harms.answer,
+          score: parseFloat(casp.section_c_applicability.question_11_benefits_worth_harms.score) || 0,
+          notes: casp.section_c_applicability.question_11_benefits_worth_harms.notes
+        }
+      ];
+
+      const transformed = {
+        metadata: {
+          title: pydanticJson.article_metadata.title,
+          authors: pydanticJson.article_metadata.authors,
+          journal: pydanticJson.article_metadata.journal,
+          year: pydanticJson.article_metadata.publication_year,
+          doi: pydanticJson.article_metadata.doi
+        },
+        quality: {
+          score: pydanticJson.overall_assessment.percentage_score,
+          rating: pydanticJson.overall_assessment.quality_rating,
+          totalQuestions: pydanticJson.overall_assessment.total_applicable_questions,
+          totalScore: pydanticJson.overall_assessment.total_score
+        },
+        pico: {
+          population: casp.section_a_validity.question_1_focused_issue.details.population,
+          intervention: casp.section_a_validity.question_1_focused_issue.details.intervention,
+          comparator: casp.section_a_validity.question_1_focused_issue.details.comparator,
+          outcomes: casp.section_a_validity.question_1_focused_issue.details.outcomes
+        },
+        casp: {
+          validity: validity,
+          results: results
+        },
+        strengths: pydanticJson.overall_assessment.key_strengths || [],
+        limitations: pydanticJson.overall_assessment.key_limitations || [],
+        conclusion: pydanticJson.overall_assessment.reliability_conclusion || 'No conclusion provided'
+      };
+
+      console.log('Transformed data:', transformed);
+      return transformed;
+    } catch (err) {
+      console.error('Transform error:', err);
+      throw new Error('Failed to transform data: ' + err.message);
+    }
+  };
+
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const json = JSON.parse(e.target.result);
+          setRawData(json);
+          const transformed = transformData(json);
+          setData(transformed);
+          setError(null);
+        } catch (err) {
+          setError('Invalid JSON file: ' + err.message);
+          console.error(err);
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  const handlePasteJson = () => {
+    try {
+      const json = JSON.parse(jsonInput);
+      setRawData(json);
+      const transformed = transformData(json);
+      setData(transformed);
+      setError(null);
+      setJsonInput('');
+    } catch (err) {
+      setError('Invalid JSON: ' + err.message);
+      console.error(err);
+    }
+  };
+
+  const handleClear = () => {
+    setData(null);
+    setRawData(null);
+    setError(null);
+    setJsonInput('');
+  };
+
+  if (!data) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Research Analysis Dashboard</h1>
+            <p className="text-gray-600">Upload or paste your JSON analysis data from Streamlit</p>
+          </div>
+
+          <div className="bg-white border-2 border-dashed border-gray-300 rounded-lg p-8">
+            {/* File Upload */}
+            <div className="mb-6">
+              <label className="flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 p-8 rounded-lg transition-colors">
+                <Upload className="w-12 h-12 text-gray-400 mb-4" />
+                <span className="text-lg font-medium text-gray-700 mb-2">Upload JSON File</span>
+                <span className="text-sm text-gray-500">Click to browse or drag and drop</span>
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+              </label>
+            </div>
+
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">OR</span>
+              </div>
+            </div>
+
+            {/* Paste JSON */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Paste JSON Data
+              </label>
+              <textarea
+                value={jsonInput}
+                onChange={(e) => setJsonInput(e.target.value)}
+                placeholder='Paste your JSON from Streamlit download here...'
+                className="w-full h-48 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
+              />
+              <button
+                onClick={handlePasteJson}
+                disabled={!jsonInput.trim()}
+                className="mt-4 w-full px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              >
+                Load Dashboard
+              </button>
+            </div>
+
+            {error && (
+              <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+                <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="font-semibold text-red-900 text-sm">Error</h3>
+                  <p className="text-red-700 text-sm mt-1">{error}</p>
+                  <p className="text-red-600 text-xs mt-2">Check browser console (F12) for details</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return <ResearchDashboard data={data} onClear={handleClear} />;
+};
+
+// ResearchDashboard component (same as before, but uses transformed data)
+const ResearchDashboard = ({ data, onClear }) => {
+  const [activeTab, setActiveTab] = useState('overview');
+  const [expandedCards, setExpandedCards] = useState({});
+
+  const toggleCard = (id) => {
+    setExpandedCards(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const getQualityColor = (rating) => {
+    const r = rating?.toUpperCase() || '';
+    if (r.includes('HIGH')) return 'text-green-600 bg-green-50 border-green-200';
+    if (r.includes('MODERATE')) return 'text-orange-600 bg-orange-50 border-orange-200';
+    if (r.includes('LOW')) return 'text-red-600 bg-red-50 border-red-200';
+    return 'text-gray-600 bg-gray-50 border-gray-200';
+  };
+
+  const getAnswerBadge = (answer) => {
+    const colors = {
+      'YES': 'bg-green-100 text-green-800 border-green-300',
+      'PARTIAL': 'bg-yellow-100 text-yellow-800 border-yellow-300',
+      'NO': 'bg-red-100 text-red-800 border-red-300',
+      'NOT_APPLICABLE': 'bg-gray-100 text-gray-800 border-gray-300',
+      'UNCLEAR': 'bg-gray-100 text-gray-800 border-gray-300'
+    };
+    return colors[answer] || 'bg-gray-100 text-gray-800 border-gray-300';
+  };
+
+  const CircularProgress = ({ percentage, size = 140 }) => {
+    const radius = (size - 20) / 2;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - (percentage / 100) * circumference;
+    
+    const color = percentage >= 75 ? '#16a34a' : percentage >= 50 ? '#ea580c' : '#dc2626';
+
+    return (
+      <div className="relative inline-flex items-center justify-center">
+        <svg width={size} height={size} className="transform -rotate-90">
+          <circle cx={size / 2} cy={size / 2} r={radius} stroke="#e5e7eb" strokeWidth="10" fill="none" />
+          <circle cx={size / 2} cy={size / 2} r={radius} stroke={color} strokeWidth="10" fill="none" 
+            strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round" 
+            className="transition-all duration-1000 ease-out" />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-3xl font-bold" style={{ color }}>{percentage.toFixed(1)}%</span>
+          <span className="text-xs text-gray-500 uppercase tracking-wide">Quality</span>
+        </div>
+      </div>
+    );
+  };
+
+  const ExpandableCard = ({ id, title, icon: Icon, children, variant = 'default' }) => {
+    const isExpanded = expandedCards[id];
+    const colors = {
+      strength: 'border-green-200 bg-green-50',
+      limitation: 'border-red-200 bg-red-50',
+      default: 'border-gray-200 bg-white'
+    };
+
+    return (
+      <div className={`border rounded-lg ${colors[variant]} transition-all duration-200`}>
+        <button onClick={() => toggleCard(id)} 
+          className="w-full px-4 py-3 flex items-center justify-between hover:bg-opacity-80 transition-colors">
+          <div className="flex items-center gap-3">
+            <Icon className="w-5 h-5" />
+            <span className="font-medium text-sm">{title}</span>
+          </div>
+          {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+        </button>
+        {isExpanded && (
+          <div className="px-4 pb-4 pt-1 text-sm text-gray-700 leading-relaxed border-t border-gray-200">
+            {children}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const OverviewTab = () => (
+    <div className="space-y-6">
+      <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <h2 className="text-2xl font-bold text-gray-900 mb-3">{data.metadata.title}</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+          <div><span className="text-gray-500">Journal:</span><span className="ml-2 font-medium">{data.metadata.journal}</span></div>
+          <div><span className="text-gray-500">Year:</span><span className="ml-2 font-medium">{data.metadata.year}</span></div>
+          <div><span className="text-gray-500">DOI:</span><span className="ml-2 font-medium text-blue-600">{data.metadata.doi}</span></div>
+        </div>
+      </div>
+
+      <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex-1">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2 flex items-center gap-2">
+              <Award className="w-5 h-5 text-orange-600" />
+              Overall Quality Assessment
+            </h3>
+            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border-2 ${getQualityColor(data.quality.rating)}`}>
+              <span className="text-sm font-bold uppercase tracking-wide">{data.quality.rating.replace(/_/g, ' ')} Quality</span>
+            </div>
+            <p className="mt-4 text-sm text-gray-600">
+              CASP Score: {data.quality.totalScore} / {data.quality.totalQuestions} applicable questions
+            </p>
+          </div>
+          <div className="flex-shrink-0">
+            <CircularProgress percentage={data.quality.score} />
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <Target className="w-5 h-5 text-blue-600" />
+          Key Findings
+        </h3>
+        <p className="text-sm text-gray-700 leading-relaxed mb-4">{data.conclusion}</p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+          <div>
+            <h4 className="font-semibold text-sm text-green-700 mb-3 flex items-center gap-2">
+              <CheckCircle className="w-4 h-4" />Strengths ({data.strengths.length})
+            </h4>
+            <ul className="space-y-2">
+              {data.strengths.slice(0, 2).map((strength, idx) => (
+                <li key={idx} className="text-sm text-gray-600 flex gap-2">
+                  <span className="text-green-600 flex-shrink-0">•</span><span>{strength}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-semibold text-sm text-red-700 mb-3 flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4" />Limitations ({data.limitations.length})
+            </h4>
+            <ul className="space-y-2">
+              {data.limitations.slice(0, 2).map((limitation, idx) => (
+                <li key={idx} className="text-sm text-gray-600 flex gap-2">
+                  <span className="text-red-600 flex-shrink-0">•</span><span>{limitation}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const MethodologyTab = () => (
+    <div className="space-y-6">
+      <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <Beaker className="w-5 h-5 text-purple-600" />CASP Critical Appraisal
+        </h3>
+        
+        <div className="mb-6">
+          <h4 className="font-semibold text-sm text-gray-700 mb-4 uppercase tracking-wide">Section A: Validity</h4>
+          <div className="space-y-3">
+            {data.casp.validity.map((item, idx) => (
+              <div key={idx} className="border border-gray-200 rounded-lg p-4">
+                <div className="flex items-start justify-between mb-2">
+                  <p className="text-sm font-medium text-gray-900 flex-1">{item.question}</p>
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getAnswerBadge(item.answer)}`}>
+                    {item.answer}
+                  </span>
+                </div>
+                <div className="flex items-center gap-4 text-xs text-gray-600 mb-2">
+                  <span>Score: <strong>{item.score}</strong> / 1.0</span>
+                  <div className="h-2 flex-1 bg-gray-100 rounded-full overflow-hidden">
+                    <div className={`h-full ${item.score === 1 ? 'bg-green-500' : item.score >= 0.5 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                      style={{ width: `${item.score * 100}%` }} />
+                  </div>
+                </div>
+                {item.notes && <p className="text-xs text-gray-600 mt-2 bg-gray-50 p-2 rounded">{item.notes}</p>}
+                {item.concerns && item.concerns.length > 0 && (
+                  <div className="mt-2 flex items-start gap-2 text-xs text-red-700 bg-red-50 p-2 rounded">
+                    <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                    <span>{item.concerns[0]}</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <h4 className="font-semibold text-sm text-gray-700 mb-4 uppercase tracking-wide">Section B: Results & Applicability</h4>
+          <div className="space-y-3">
+            {data.casp.results.map((item, idx) => (
+              <div key={idx} className="border border-gray-200 rounded-lg p-4">
+                <div className="flex items-start justify-between mb-2">
+                  <p className="text-sm font-medium text-gray-900 flex-1">{item.question}</p>
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getAnswerBadge(item.answer)}`}>
+                    {item.answer}
+                  </span>
+                </div>
+                <div className="flex items-center gap-4 text-xs text-gray-600 mb-2">
+                  <span>Score: <strong>{item.score}</strong> / 1.0</span>
+                  <div className="h-2 flex-1 bg-gray-100 rounded-full overflow-hidden">
+                    <div className={`h-full ${item.score === 1 ? 'bg-green-500' : item.score >= 0.5 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                      style={{ width: `${item.score * 100}%` }} />
+                  </div>
+                </div>
+                {item.biasRisk && <div className="mb-2"><span className="text-xs font-semibold text-red-700">Bias Risk: {item.biasRisk}</span></div>}
+                {item.notes && <p className="text-xs text-gray-600 mt-2 bg-gray-50 p-2 rounded">{item.notes}</p>}
+                {item.concerns && item.concerns.length > 0 && (
+                  <div className="mt-2 flex items-start gap-2 text-xs text-red-700 bg-red-50 p-2 rounded">
+                    <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                    <span>{item.concerns[0]}</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const ClinicalContextTab = () => (
+    <div className="space-y-6">
+      <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <Users className="w-5 h-5 text-blue-600" />PICO Framework
+        </h3>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="border border-blue-200 rounded-lg p-4 bg-blue-50">
+            <h4 className="font-semibold text-sm text-blue-900 mb-2 flex items-center gap-2">
+              <Users className="w-4 h-4" />Population
+            </h4>
+            <p className="text-sm text-gray-700 leading-relaxed">{data.pico.population}</p>
+          </div>
+          
+          <div className="border border-green-200 rounded-lg p-4 bg-green-50">
+            <h4 className="font-semibold text-sm text-green-900 mb-2 flex items-center gap-2">
+              <Activity className="w-4 h-4" />Intervention
+            </h4>
+            <p className="text-sm text-gray-700 leading-relaxed">{data.pico.intervention}</p>
+          </div>
+          
+          <div className="border border-purple-200 rounded-lg p-4 bg-purple-50">
+            <h4 className="font-semibold text-sm text-purple-900 mb-2 flex items-center gap-2">
+              <TrendingUp className="w-4 h-4" />Comparator
+            </h4>
+            <p className="text-sm text-gray-700 leading-relaxed">{data.pico.comparator}</p>
+          </div>
+          
+          <div className="border border-orange-200 rounded-lg p-4 bg-orange-50">
+            <h4 className="font-semibold text-sm text-orange-900 mb-2 flex items-center gap-2">
+              <Target className="w-4 h-4" />Outcomes
+            </h4>
+            <p className="text-sm text-gray-700 leading-relaxed">{data.pico.outcomes}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const EvidenceTab = () => (
+    <div className="space-y-6">
+      <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <FileText className="w-5 h-5 text-indigo-600" />Evidence Quality
+        </h3>
+        
+        <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+          <h4 className="font-semibold text-sm text-orange-900 mb-2">Conclusion</h4>
+          <p className="text-sm text-gray-700 leading-relaxed">{data.conclusion}</p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-6">
+          <div>
+            <h4 className="font-semibold text-sm text-green-700 mb-3 flex items-center gap-2">
+              <CheckCircle className="w-5 h-5" />Study Strengths
+            </h4>
+            <div className="space-y-2">
+              {data.strengths.map((strength, idx) => (
+                <ExpandableCard key={`strength-${idx}`} id={`strength-${idx}`} title={`Strength ${idx + 1}`}
+                  icon={CheckCircle} variant="strength">
+                  {strength}
+                </ExpandableCard>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h4 className="font-semibold text-sm text-red-700 mb-3 flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5" />Study Limitations
+            </h4>
+            <div className="space-y-2">
+              {data.limitations.map((limitation, idx) => (
+                <ExpandableCard key={`limitation-${idx}`} id={`limitation-${idx}`} 
+                  title={`Limitation ${idx + 1}`} icon={AlertTriangle} variant="limitation">
+                  {limitation}
+                </ExpandableCard>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const tabs = [
+    { id: 'overview', label: 'Overview', icon: Award },
+    { id: 'methodology', label: 'Methodology (CASP)', icon: Beaker },
+    { id: 'clinical', label: 'Clinical Context (PICO)', icon: Users },
+    { id: 'evidence', label: 'Evidence (GRADE)', icon: FileText }
+  ];
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+      <div className="max-w-6xl mx-auto">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Research Analysis Dashboard</h1>
+            <p className="text-gray-600">CASP Critical Appraisal & Quality Assessment</p>
+          </div>
+          <button onClick={onClear}
+            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium">
+            Load New Data
+          </button>
+        </div>
+
+        <div className="bg-white border border-gray-200 rounded-lg mb-6 overflow-hidden">
+          <div className="flex flex-wrap border-b border-gray-200">
+            {tabs.map(tab => {
+              const Icon = tab.icon;
+              return (
+                <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-2 px-6 py-4 font-medium text-sm transition-all ${
+                    activeTab === tab.id ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  }`}>
+                  <Icon className="w-4 h-4" />{tab.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="transition-all duration-300">
+          {activeTab === 'overview' && <OverviewTab />}
+          {activeTab === 'methodology' && <MethodologyTab />}
+          {activeTab === 'clinical' && <ClinicalContextTab />}
+          {activeTab === 'evidence' && <EvidenceTab />}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
