@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Union
 from enum import Enum
 
 
@@ -16,6 +16,7 @@ class RiskLevel(str, Enum):
     MODERATE = "MODERATE"
     HIGH = "HIGH"
     UNCLEAR = "UNCLEAR"
+    NOT_APPLICABLE = "NOT_APPLICABLE"
 
 
 class QualityRating(str, Enum):
@@ -47,6 +48,13 @@ class ChecklistType(str, Enum):
     CASP_SYSTEMATIC_REVIEW = "CASP_SYSTEMATIC_REVIEW"
 
 
+class StudyType(str, Enum):
+    ORIGINAL_ARTICLE = "ORIGINAL_ARTICLE"
+    SYSTEMATIC_REVIEW = "SYSTEMATIC_REVIEW"
+    NARRATIVE_REVIEW = "NARRATIVE_REVIEW"
+    META_ANALYSIS = "META_ANALYSIS"
+
+
 # Article Metadata Models
 class ArticleMetadata(BaseModel):
     title: str
@@ -54,7 +62,8 @@ class ArticleMetadata(BaseModel):
     journal: str
     publication_year: int
     doi: str
-    study_type: str
+    study_type: StudyType  # Changed to enum
+    frameworks_applied: List[str]  # e.g., ["CASP", "GRADE", "PICO"]
     limitations_found: Optional[List[str]] = None
 
 
@@ -289,7 +298,7 @@ class BenefitsHarmsQuestion(BaseModel):
     question: str
     answer: AnswerType
     details: BenefitsHarmsDetails
-    score: str
+    score: Union[str, float]  # Can be numeric score or "N/A"
     limitations_found: Optional[List[str]] = None
 
 
@@ -367,6 +376,9 @@ class OverallAssessment(BaseModel):
     reliability_conclusion: str
     recommendations: List[str]
     limitations_found: Optional[List[str]] = None
+    what_was_not_considered: List[str]  # Critical gaps in the study
+    scientific_justification: str  # Explain how different frameworks influenced final score
+    cross_model_conflicts: Optional[str] = None  # e.g., "High CASP but Low GRADE due to N=7"
 
 
 # Root Model
