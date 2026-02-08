@@ -337,17 +337,17 @@ class InternalValidity(BaseModel):
 
 
 class ExternalValidity(BaseModel):
-    animal_to_human_translation: str
-    population_representativeness: str
-    intervention_feasibility: str
+    animal_to_human_translation: Optional[str] = None
+    population_representativeness: Optional[str] = None
+    intervention_feasibility: Optional[str] = None
     limitations_found: Optional[List[str]] = None
 
 
 class StatisticalRigor(BaseModel):
-    appropriate_tests: bool
-    multiple_testing_correction: str
-    sample_size_justification: str
-    power_calculation: str
+    appropriate_tests: Optional[bool] = None
+    multiple_testing_correction: Optional[str] = None
+    sample_size_justification: Optional[str] = None
+    power_calculation: Optional[str] = None
     limitations_found: Optional[List[str]] = None
 
 
