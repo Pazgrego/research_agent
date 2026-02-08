@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Dashboard - Upload JSON</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        const Dashboard = () => {
+            const [data, setData] = useState(null);
+            const [error, setError] = useState(null);
+
+            const handleFileUpload = (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const rawData = JSON.parse(e.target.result);
+                        setData(rawData);
+                        setError(null);
+                    } catch (err) {
+                        setError(`Failed to parse JSON: ${err.message}`);
+                    }
+                };
+                reader.readAsText(file);
+            };
+
+            if (!data) {
+                return (
+                    <div style={{
+                        minHeight: '100vh',
+                        background: 'linear-gradient(to bottom right, #eff6ff, #dbeafe)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '20px'
+                    }}>
+                        <div style={{
+                            backgroundColor: 'white',
+                            borderRadius: '16px',
+                            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                            padding: '40px',
+                            maxWidth: '500px',
+                            width: '100%'
+                        }}>
+                            <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+                                <div style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    width: '80px',
+                                    height: '80px',
+                                    backgroundColor: '#dbeafe',
+                                    borderRadius: '50%',
+                                    marginBottom: '20px'
+                                }}>
+                                    <span style={{ fontSize: '40px' }}>📊</span>
+                                </div>
+                                <h2 style={{
+                                    fontSize: '24px',
+                                    fontWeight: 'bold',
+                                    color: '#111827',
+                                    marginBottom: '10px'
+                                }}>Research Dashboard</h2>
+                                <p style={{ color: '#6b7280' }}>
+                                    Upload your JSON analysis file to visualize results
+                                </p>
+                            </div>
+
+                            <label style={{ display: 'block', cursor: 'pointer' }}>
+                                <div style={{
+                                    border: '2px dashed #d1d5db',
+                                    borderRadius: '8px',
+                                    padding: '40px',
+                                    textAlign: 'center',
+                                    transition: 'all 0.3s'
+                                }}
+                                onMouseOver={(e) => {
+                                    e.currentTarget.style.borderColor = '#3b82f6';
+                                    e.currentTarget.style.backgroundColor = '#eff6ff';
+                                }}
+                                onMouseOut={(e) => {
+                                    e.currentTarget.style.borderColor = '#d1d5db';
+                                    e.currentTarget.style.backgroundColor = 'transparent';
+                                }}>
+                                    <div style={{ fontSize: '48px', marginBottom: '10px' }}>📁</div>
+                                    <span style={{
+                                        fontSize: '14px',
+                                        fontWeight: '500',
+                                        color: '#374151'
+                                    }}>
+                                        Click to upload JSON file
+                                    </span>
+                                    <p style={{
+                                        fontSize: '12px',
+                                        color: '#6b7280',
+                                        marginTop: '5px'
+                                    }}>
+                                        From Streamlit app download
+                                    </p>
+                                </div>
+                                <input 
+                                    type="file" 
+                                    accept=".json"
+                                    onChange={handleFileUpload}
+                                    style={{ display: 'none' }}
+                                />
+                            </label>
+
+                            {error && (
+                                <div style={{
+                                    backgroundColor: '#fef2f2',
+                                    border: '1px solid #fecaca',
+                                    borderRadius: '8px',
+                                    padding: '15px',
+                                    marginTop: '20px'
+                                }}>
+                                    <p style={{
+                                        fontSize: '14px',
+                                        fontWeight: '600',
+                                        color: '#991b1b',
+                                        marginBottom: '5px'
+                                    }}>Upload Error</p>
+                                    <p style={{
+                                        fontSize: '12px',
+                                        color: '#b91c1c'
+                                    }}>{error}</p>
+                                </div>
+                            )}
+
+                            <div style={{
+                                marginTop: '30px',
+                                paddingTop: '20px',
+                                borderTop: '1px solid #e5e7eb',
+                                textAlign: 'center'
+                            }}>
+                                <p style={{ fontSize: '12px', color: '#6b7280' }}>
+                                    💡 Download JSON from Streamlit app after analysis
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            // Display data preview
+            return (
+                <div style={{ padding: '40px', maxWidth: '1200px', margin: '0 auto' }}>
+                    <div style={{ marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                            <h1 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '10px' }}>
+                                Research Analysis Dashboard
+                            </h1>
+                            <p style={{ color: '#6b7280' }}>JSON data loaded successfully</p>
+                        </div>
+                        <button 
+                            onClick={() => setData(null)}
+                            style={{
+                                padding: '10px 20px',
+                                backgroundColor: '#3b82f6',
+                                color: 'white',
+                                borderRadius: '8px',
+                                border: 'none',
+                                cursor: 'pointer',
+                                fontWeight: '500'
+                            }}
+                        >
+                            Upload New File
+                        </button>
+                    </div>
+
+                    <div style={{
+                        backgroundColor: 'white',
+                        borderRadius: '12px',
+                        padding: '30px',
+                        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+                    }}>
+                        <h3 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '15px' }}>
+                            Study Information
+                        </h3>
+                        <div style={{ marginBottom: '20px' }}>
+                            <p style={{ fontSize: '16px', fontWeight: '600', marginBottom: '5px' }}>
+                                {data.article_metadata?.title || 'Title not available'}
+                            </p>
+                            <p style={{ fontSize: '14px', color: '#6b7280' }}>
+                                {data.article_metadata?.journal} ({data.article_metadata?.publication_year})
+                            </p>
+                        </div>
+
+                        {data.overall_assessment && (
+                            <>
+                                <h4 style={{ fontSize: '18px', fontWeight: 'bold', marginTop: '30px', marginBottom: '15px' }}>
+                                    Overall Assessment
+                                </h4>
+                                <div style={{
+                                    backgroundColor: '#f9fafb',
+                                    padding: '20px',
+                                    borderRadius: '8px',
+                                    marginBottom: '20px'
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '15px' }}>
+                                        <div style={{ fontSize: '48px', fontWeight: 'bold', color: '#3b82f6' }}>
+                                            {data.overall_assessment.percentage_score}%
+                                        </div>
+                                        <div>
+                                            <span style={{
+                                                display: 'inline-block',
+                                                padding: '5px 15px',
+                                                backgroundColor: '#fef3c7',
+                                                color: '#92400e',
+                                                borderRadius: '20px',
+                                                fontSize: '14px',
+                                                fontWeight: 'bold'
+                                            }}>
+                                                {data.overall_assessment.quality_rating}
+                                            </span>
+                                            <p style={{ fontSize: '14px', color: '#6b7280', marginTop: '5px' }}>
+                                                Score: {data.overall_assessment.total_score} / {data.overall_assessment.total_applicable_questions}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {data.overall_assessment.key_strengths && (
+                                    <>
+                                        <h4 style={{ fontSize: '16px', fontWeight: 'bold', color: '#059669', marginBottom: '10px' }}>
+                                            ✅ Strengths
+                                        </h4>
+                                        <ul style={{ marginBottom: '20px', paddingLeft: '20px' }}>
+                                            {data.overall_assessment.key_strengths.map((strength, idx) => (
+                                                <li key={idx} style={{ fontSize: '14px', color: '#374151', marginBottom: '8px' }}>
+                                                    {strength}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </>
+                                )}
+
+                                {data.overall_assessment.key_limitations && (
+                                    <>
+                                        <h4 style={{ fontSize: '16px', fontWeight: 'bold', color: '#dc2626', marginBottom: '10px' }}>
+                                            ⚠️ Limitations
+                                        </h4>
+                                        <ul style={{ marginBottom: '20px', paddingLeft: '20px' }}>
+                                            {data.overall_assessment.key_limitations.map((limitation, idx) => (
+                                                <li key={idx} style={{ fontSize: '14px', color: '#374151', marginBottom: '8px' }}>
+                                                    {limitation}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </>
+                                )}
+
+                                {data.overall_assessment.reliability_conclusion && (
+                                    <>
+                                        <h4 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '10px' }}>
+                                            📋 Conclusion
+                                        </h4>
+                                        <p style={{ fontSize: '14px', color: '#374151', lineHeight: '1.6' }}>
+                                            {data.overall_assessment.reliability_conclusion}
+                                        </p>
+                                    </>
+                                )}
+                            </>
+                        )}
+                    </div>
+
+                    <div style={{
+                        marginTop: '20px',
+                        padding: '15px',
+                        backgroundColor: '#f3f4f6',
+                        borderRadius: '8px'
+                    }}>
+                        <details>
+                            <summary style={{ cursor: 'pointer', fontWeight: '600', marginBottom: '10px' }}>
+                                View Raw JSON
+                            </summary>
+                            <pre style={{
+                                backgroundColor: '#1f2937',
+                                color: '#d1d5db',
+                                padding: '15px',
+                                borderRadius: '6px',
+                                overflow: 'auto',
+                                fontSize: '12px'
+                            }}>
+                                {JSON.stringify(data, null, 2)}
+                            </pre>
+                        </details>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<Dashboard />);
+    </script>
+</body>
+</html>

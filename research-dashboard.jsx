@@ -1,18 +1,24 @@
-import React, { useState } from 'react';
-import { CheckCircle, AlertTriangle, FileText, Beaker, Users, TrendingUp, ChevronDown, ChevronUp, Activity, Target, Award } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { 
+  CheckCircle, AlertTriangle, FileText, Beaker, Users, TrendingUp, 
+  ChevronDown, ChevronUp, Activity, Target, Award, AlertCircle,
+  Microscope, BookOpen, ShieldAlert, FlaskConical, XCircle
+} from 'lucide-react';
 
-const ResearchDashboard = () => {
+const ContextAwareDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [expandedCards, setExpandedCards] = useState({});
 
-  // Data from JSON
+  // Enhanced data from JSON with study type detection
   const data = {
     metadata: {
       title: "Artificial sweeteners induce glucose intolerance by altering the gut microbiota",
       authors: ["Jotham Suez", "Tal Korem", "David Zeevi", "Gili Zilberman-Schapira", "Christoph A. Thaiss", "Ori Maza", "David Israeli", "Niv Zmora", "Shlomit Gilad", "Adina Weinberger", "Yael Kuperman", "Alon Harmelin", "Ilana Kolodkin-Gal", "Hagit Shapiro", "Zamir Halpern", "Eran Segal", "Eran Elinav"],
       journal: "Nature",
       year: 2014,
-      doi: "10.1038/nature13793"
+      doi: "10.1038/nature13793",
+      studyType: "ORIGINAL_ARTICLE", // Derived from "Mixed methods (animal intervention, human observational, human intervention)"
+      studyTypeLabel: "Original Research Article (Mixed Methods)"
     },
     quality: {
       score: 59.1,
@@ -112,8 +118,148 @@ const ResearchDashboard = () => {
       "Absence of explicit power calculations for sample sizes across study components.",
       "Lack of confidence intervals for many reported effect sizes, which would provide a clearer measure of precision."
     ],
-    conclusion: "The study provides moderate quality evidence suggesting that artificial sweeteners induce glucose intolerance by altering the gut microbiota in both mice and humans. The mechanistic evidence from animal models is strong and causally links microbiota changes to metabolic derangements. The human data, while supportive and providing initial causal insights from the intervention study, is limited by study design (observational, small intervention cohort, lack of blinding) and thus has lower certainty of evidence."
+    conclusion: "The study provides moderate quality evidence suggesting that artificial sweeteners induce glucose intolerance by altering the gut microbiota in both mice and humans. The mechanistic evidence from animal models is strong and causally links microbiota changes to metabolic derangements. The human data, while supportive and providing initial causal insights from the intervention study, is limited by study design (observational, small intervention cohort, lack of blinding) and thus has lower certainty of evidence.",
+    scientificJustification: {
+      gradeRationale: "The GRADE quality rating of MODERATE (59.1%) reflects a careful balance between the study's significant strengths and notable limitations. The animal work demonstrates strong mechanistic plausibility with robust experimental design, including randomization, multiple model systems, and causality testing through fecal transplantation. However, the human evidence—critical for clinical translation—is substantially weaker. The observational cohort provides only correlational data with confounding risks, while the interventional human study, though showing causal potential, suffers from a critically small sample size (N=7) and brief duration (7 days). This limited human evidence prevents a HIGH quality rating despite excellent mechanistic insights.",
+      keyDowngrades: [
+        {
+          factor: "Small Human Sample Size (N=7)",
+          impact: "Major downgrade",
+          explanation: "The interventional human component included only 7 participants over 7 days. This severely limits statistical power, generalizability, and the ability to detect heterogeneous treatment effects across diverse populations. For GRADE assessment, inadequate sample size is a critical limitation that downgrades certainty of evidence."
+        },
+        {
+          factor: "Lack of Blinding",
+          impact: "Moderate downgrade",
+          explanation: "Neither participants nor personnel were blinded in any study component. This introduces substantial risk of performance and detection bias, particularly concerning subjective outcomes or behavioral modifications that could influence metabolic parameters."
+        },
+        {
+          factor: "Indirectness of Evidence",
+          impact: "Minor downgrade",
+          explanation: "Heavy reliance on animal models creates indirectness when extrapolating to human clinical outcomes. While mechanistic insights are valuable, cross-species translation requires cautious interpretation, especially for complex metabolic phenotypes."
+        }
+      ],
+      upgradeConsiderations: [
+        {
+          factor: "Strong Mechanistic Evidence",
+          rationale: "Fecal microbiota transplantation experiments provide compelling causal evidence linking microbiome alterations to metabolic phenotype. This mechanistic coherence partially offsets concerns about human sample size."
+        },
+        {
+          factor: "Dose-Response and Consistency",
+          rationale: "Effects observed across multiple NAS types, doses, and mouse strains demonstrate consistency and suggest biological plausibility, strengthening confidence in findings."
+        }
+      ]
+    },
+    missingOutcomes: [
+      {
+        category: "Long-term Safety & Efficacy",
+        gaps: [
+          "No long-term follow-up data beyond 7 days in human intervention study",
+          "Cardiovascular outcomes not assessed despite known metabolic-cardiovascular links",
+          "Renal function and kidney disease progression not evaluated",
+          "Neurological or cognitive effects of chronic NAS exposure not measured",
+          "Cancer risk or tumor progression markers not investigated"
+        ],
+        criticalityLevel: "HIGH"
+      },
+      {
+        category: "Population Diversity & Generalizability",
+        gaps: [
+          "Pediatric populations completely excluded despite widespread NAS consumption in children",
+          "Pregnant or lactating women not studied, despite potential developmental effects",
+          "Individuals with pre-existing diabetes or metabolic syndrome underrepresented",
+          "No stratification by genetic background, ethnicity, or baseline microbiome composition",
+          "Elderly populations (>65 years) not specifically examined"
+        ],
+        criticalityLevel: "HIGH"
+      },
+      {
+        category: "Mechanistic & Biological Pathways",
+        gaps: [
+          "Specific bacterial species or strains responsible for metabolic effects not definitively identified",
+          "Host immune system interactions with altered microbiota not characterized",
+          "Metabolomic profiling incomplete—many bacterial metabolites not measured",
+          "Epigenetic modifications or gene expression changes in human tissues not assessed",
+          "Dose-response relationships in humans not established"
+        ],
+        criticalityLevel: "MODERATE"
+      },
+      {
+        category: "Clinical & Patient-Centered Outcomes",
+        gaps: [
+          "Quality of life measures not included",
+          "Adherence and acceptability of NAS restriction not evaluated",
+          "Socioeconomic factors influencing NAS consumption patterns not considered",
+          "Cost-effectiveness analysis of NAS avoidance strategies absent",
+          "Patient preferences and values regarding NAS use not explored"
+        ],
+        criticalityLevel: "MODERATE"
+      },
+      {
+        category: "Safety Monitoring",
+        gaps: [
+          "Adverse events systematically monitored only for exclusion criteria (pregnancy), not comprehensively tracked",
+          "Hepatotoxicity markers measured but not emphasized as primary safety outcome",
+          "Gut barrier integrity and intestinal permeability not assessed",
+          "Potential for microbiome-mediated drug interactions not investigated"
+        ],
+        criticalityLevel: "MODERATE"
+      }
+    ]
   };
+
+  // Study type configuration
+  const studyTypeConfig = {
+    ORIGINAL_ARTICLE: {
+      color: 'blue',
+      bgColor: 'bg-blue-50',
+      borderColor: 'border-blue-300',
+      textColor: 'text-blue-900',
+      accentColor: 'text-blue-600'
+    },
+    SYSTEMATIC_REVIEW: {
+      color: 'purple',
+      bgColor: 'bg-purple-50',
+      borderColor: 'border-purple-300',
+      textColor: 'text-purple-900',
+      accentColor: 'text-purple-600'
+    },
+    NARRATIVE_REVIEW: {
+      color: 'teal',
+      bgColor: 'bg-teal-50',
+      borderColor: 'border-teal-300',
+      textColor: 'text-teal-900',
+      accentColor: 'text-teal-600'
+    }
+  };
+
+  const currentTheme = studyTypeConfig[data.metadata.studyType];
+
+  // Dynamic tab configuration based on study type
+  const tabConfigs = {
+    ORIGINAL_ARTICLE: [
+      { id: 'overview', label: 'Overview', icon: Award },
+      { id: 'pico', label: 'PICO Framework', icon: Users },
+      { id: 'casp', label: 'CASP Quality', icon: Beaker },
+      { id: 'grade', label: 'GRADE Evidence', icon: FileText },
+      { id: 'missing', label: 'Gap Analysis', icon: AlertCircle }
+    ],
+    SYSTEMATIC_REVIEW: [
+      { id: 'overview', label: 'Overview', icon: Award },
+      { id: 'pico', label: 'PICO Framework', icon: Users },
+      { id: 'prisma', label: 'PRISMA/AMSTAR', icon: BookOpen },
+      { id: 'grade', label: 'GRADE Evidence', icon: FileText },
+      { id: 'missing', label: 'Gap Analysis', icon: AlertCircle }
+    ],
+    NARRATIVE_REVIEW: [
+      { id: 'overview', label: 'Overview', icon: Award },
+      { id: 'scope', label: 'Scope (PICO)', icon: Users },
+      { id: 'sanra', label: 'SANRA Analysis', icon: Microscope },
+      { id: 'evidence', label: 'Evidence Quality', icon: FileText },
+      { id: 'missing', label: 'Gap Analysis', icon: AlertCircle }
+    ]
+  };
+
+  const tabs = tabConfigs[data.metadata.studyType];
 
   const toggleCard = (id) => {
     setExpandedCards(prev => ({ ...prev, [id]: !prev[id] }));
@@ -125,6 +271,15 @@ const ResearchDashboard = () => {
       case 'MODERATE': return 'text-orange-600 bg-orange-50 border-orange-200';
       case 'LOW': return 'text-red-600 bg-red-50 border-red-200';
       default: return 'text-gray-600 bg-gray-50 border-gray-200';
+    }
+  };
+
+  const getCriticalityColor = (level) => {
+    switch(level) {
+      case 'HIGH': return 'border-red-300 bg-red-50 text-red-900';
+      case 'MODERATE': return 'border-orange-300 bg-orange-50 text-orange-900';
+      case 'LOW': return 'border-yellow-300 bg-yellow-50 text-yellow-900';
+      default: return 'border-gray-300 bg-gray-50 text-gray-900';
     }
   };
 
@@ -207,9 +362,20 @@ const ResearchDashboard = () => {
 
   const OverviewTab = () => (
     <div className="space-y-6">
-      {/* Header Card */}
+      {/* Header Card with Study Type Badge */}
       <div className="bg-white border border-gray-200 rounded-lg p-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-3">{data.metadata.title}</h2>
+        <div className="flex items-start gap-3 mb-3">
+          <h2 className="text-2xl font-bold text-gray-900 flex-1">{data.metadata.title}</h2>
+          <div className={`px-4 py-2 rounded-lg border-2 ${currentTheme.bgColor} ${currentTheme.borderColor} flex-shrink-0`}>
+            <div className="flex items-center gap-2">
+              <FlaskConical className={`w-5 h-5 ${currentTheme.accentColor}`} />
+              <div>
+                <div className="text-xs text-gray-600 uppercase tracking-wide">Study Type</div>
+                <div className={`text-sm font-bold ${currentTheme.textColor}`}>{data.metadata.studyTypeLabel}</div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
           <div>
             <span className="text-gray-500">Journal:</span>
@@ -247,11 +413,60 @@ const ResearchDashboard = () => {
         </div>
       </div>
 
-      {/* Key Findings */}
+      {/* Scientific Justification Card */}
+      <div className="bg-gradient-to-br from-indigo-50 to-blue-50 border-2 border-indigo-200 rounded-lg p-6">
+        <h3 className="text-lg font-semibold text-indigo-900 mb-4 flex items-center gap-2">
+          <Microscope className="w-5 h-5 text-indigo-600" />
+          Scientific Logic & Justification
+        </h3>
+        <div className="space-y-4">
+          <div className="bg-white rounded-lg p-4 border border-indigo-100">
+            <h4 className="font-semibold text-sm text-indigo-800 mb-2">Why MODERATE Quality (59.1%)?</h4>
+            <p className="text-sm text-gray-700 leading-relaxed">{data.scientificJustification.gradeRationale}</p>
+          </div>
+
+          <div>
+            <h4 className="font-semibold text-sm text-red-800 mb-3 flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4" />
+              Key Factors Downgrading Evidence Quality
+            </h4>
+            <div className="space-y-2">
+              {data.scientificJustification.keyDowngrades.map((item, idx) => (
+                <div key={idx} className="bg-white rounded-lg p-3 border-l-4 border-red-400">
+                  <div className="flex items-start justify-between mb-1">
+                    <span className="font-semibold text-sm text-gray-900">{item.factor}</span>
+                    <span className="text-xs px-2 py-1 bg-red-100 text-red-800 rounded-full font-medium">
+                      {item.impact}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-600 leading-relaxed">{item.explanation}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h4 className="font-semibold text-sm text-green-800 mb-3 flex items-center gap-2">
+              <CheckCircle className="w-4 h-4" />
+              Factors Supporting Evidence Quality
+            </h4>
+            <div className="space-y-2">
+              {data.scientificJustification.upgradeConsiderations.map((item, idx) => (
+                <div key={idx} className="bg-white rounded-lg p-3 border-l-4 border-green-400">
+                  <span className="font-semibold text-sm text-gray-900 block mb-1">{item.factor}</span>
+                  <p className="text-xs text-gray-600 leading-relaxed">{item.rationale}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Key Findings Summary */}
       <div className="bg-white border border-gray-200 rounded-lg p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
           <Target className="w-5 h-5 text-blue-600" />
-          Key Findings
+          Key Findings Summary
         </h3>
         <p className="text-sm text-gray-700 leading-relaxed mb-4">{data.conclusion}</p>
         
@@ -289,93 +504,7 @@ const ResearchDashboard = () => {
     </div>
   );
 
-  const MethodologyTab = () => (
-    <div className="space-y-6">
-      <div className="bg-white border border-gray-200 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <Beaker className="w-5 h-5 text-purple-600" />
-          CASP Critical Appraisal - Validity & Results
-        </h3>
-        
-        {/* Section A: Validity */}
-        <div className="mb-6">
-          <h4 className="font-semibold text-sm text-gray-700 mb-4 uppercase tracking-wide">Section A: Validity</h4>
-          <div className="space-y-3">
-            {data.casp.validity.map((item, idx) => (
-              <div key={idx} className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors">
-                <div className="flex items-start justify-between mb-2">
-                  <p className="text-sm font-medium text-gray-900 flex-1">{item.question}</p>
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getAnswerBadge(item.answer)}`}>
-                    {item.answer}
-                  </span>
-                </div>
-                <div className="flex items-center gap-4 text-xs text-gray-600 mb-2">
-                  <span>Score: <strong>{item.score}</strong> / 1.0</span>
-                  <div className="h-2 flex-1 bg-gray-100 rounded-full overflow-hidden">
-                    <div 
-                      className={`h-full ${item.score === 1 ? 'bg-green-500' : item.score === 0.5 ? 'bg-yellow-500' : 'bg-red-500'}`}
-                      style={{ width: `${item.score * 100}%` }}
-                    />
-                  </div>
-                </div>
-                {item.notes && (
-                  <p className="text-xs text-gray-600 mt-2 bg-gray-50 p-2 rounded">{item.notes}</p>
-                )}
-                {item.concerns && (
-                  <div className="mt-2 flex items-start gap-2 text-xs text-red-700 bg-red-50 p-2 rounded">
-                    <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                    <span>{item.concerns[0]}</span>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Section B: Results */}
-        <div>
-          <h4 className="font-semibold text-sm text-gray-700 mb-4 uppercase tracking-wide">Section B: Results & Clinical Utility</h4>
-          <div className="space-y-3">
-            {data.casp.results.map((item, idx) => (
-              <div key={idx} className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors">
-                <div className="flex items-start justify-between mb-2">
-                  <p className="text-sm font-medium text-gray-900 flex-1">{item.question}</p>
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getAnswerBadge(item.answer)}`}>
-                    {item.answer}
-                  </span>
-                </div>
-                <div className="flex items-center gap-4 text-xs text-gray-600 mb-2">
-                  <span>Score: <strong>{item.score}</strong> / 1.0</span>
-                  <div className="h-2 flex-1 bg-gray-100 rounded-full overflow-hidden">
-                    <div 
-                      className={`h-full ${item.score === 1 ? 'bg-green-500' : item.score === 0.5 ? 'bg-yellow-500' : 'bg-red-500'}`}
-                      style={{ width: `${item.score * 100}%` }}
-                    />
-                  </div>
-                </div>
-                {item.biasRisk && (
-                  <div className="mb-2">
-                    <span className="text-xs font-semibold text-red-700">Bias Risk: {item.biasRisk}</span>
-                  </div>
-                )}
-                {item.notes && (
-                  <p className="text-xs text-gray-600 mt-2 bg-gray-50 p-2 rounded">{item.notes}</p>
-                )}
-                {item.concerns && (
-                  <div className="mt-2 flex items-start gap-2 text-xs text-red-700 bg-red-50 p-2 rounded">
-                    <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                    <span>{item.concerns[0]}</span>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const ClinicalContextTab = () => (
+  const PICOTab = () => (
     <div className="space-y-6">
       <div className="bg-white border border-gray-200 rounded-lg p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
@@ -420,16 +549,100 @@ const ResearchDashboard = () => {
     </div>
   );
 
-  const EvidenceTab = () => (
+  const CASPTab = () => (
+    <div className="space-y-6">
+      <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <Beaker className="w-5 h-5 text-purple-600" />
+          CASP Critical Appraisal - Validity & Results
+        </h3>
+        
+        <div className="mb-6">
+          <h4 className="font-semibold text-sm text-gray-700 mb-4 uppercase tracking-wide">Section A: Validity</h4>
+          <div className="space-y-3">
+            {data.casp.validity.map((item, idx) => (
+              <div key={idx} className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors">
+                <div className="flex items-start justify-between mb-2">
+                  <p className="text-sm font-medium text-gray-900 flex-1">{item.question}</p>
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getAnswerBadge(item.answer)}`}>
+                    {item.answer}
+                  </span>
+                </div>
+                <div className="flex items-center gap-4 text-xs text-gray-600 mb-2">
+                  <span>Score: <strong>{item.score}</strong> / 1.0</span>
+                  <div className="h-2 flex-1 bg-gray-100 rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full ${item.score === 1 ? 'bg-green-500' : item.score === 0.5 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                      style={{ width: `${item.score * 100}%` }}
+                    />
+                  </div>
+                </div>
+                {item.notes && (
+                  <p className="text-xs text-gray-600 mt-2 bg-gray-50 p-2 rounded">{item.notes}</p>
+                )}
+                {item.concerns && (
+                  <div className="mt-2 flex items-start gap-2 text-xs text-red-700 bg-red-50 p-2 rounded">
+                    <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                    <span>{item.concerns[0]}</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <h4 className="font-semibold text-sm text-gray-700 mb-4 uppercase tracking-wide">Section B: Results & Clinical Utility</h4>
+          <div className="space-y-3">
+            {data.casp.results.map((item, idx) => (
+              <div key={idx} className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors">
+                <div className="flex items-start justify-between mb-2">
+                  <p className="text-sm font-medium text-gray-900 flex-1">{item.question}</p>
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getAnswerBadge(item.answer)}`}>
+                    {item.answer}
+                  </span>
+                </div>
+                <div className="flex items-center gap-4 text-xs text-gray-600 mb-2">
+                  <span>Score: <strong>{item.score}</strong> / 1.0</span>
+                  <div className="h-2 flex-1 bg-gray-100 rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full ${item.score === 1 ? 'bg-green-500' : item.score === 0.5 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                      style={{ width: `${item.score * 100}%` }}
+                    />
+                  </div>
+                </div>
+                {item.biasRisk && (
+                  <div className="mb-2">
+                    <span className="text-xs font-semibold text-red-700">Bias Risk: {item.biasRisk}</span>
+                  </div>
+                )}
+                {item.notes && (
+                  <p className="text-xs text-gray-600 mt-2 bg-gray-50 p-2 rounded">{item.notes}</p>
+                )}
+                {item.concerns && (
+                  <div className="mt-2 flex items-start gap-2 text-xs text-red-700 bg-red-50 p-2 rounded">
+                    <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                    <span>{item.concerns[0]}</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const GRADETab = () => (
     <div className="space-y-6">
       <div className="bg-white border border-gray-200 rounded-lg p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
           <FileText className="w-5 h-5 text-indigo-600" />
-          GRADE Evidence Quality
+          GRADE Evidence Quality Assessment
         </h3>
         
         <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
-          <h4 className="font-semibold text-sm text-orange-900 mb-2">Reliability Conclusion</h4>
+          <h4 className="font-semibold text-sm text-orange-900 mb-2">Evidence Certainty Conclusion</h4>
           <p className="text-sm text-gray-700 leading-relaxed">{data.conclusion}</p>
         </div>
 
@@ -478,12 +691,63 @@ const ResearchDashboard = () => {
     </div>
   );
 
-  const tabs = [
-    { id: 'overview', label: 'Overview', icon: Award },
-    { id: 'methodology', label: 'Methodology (CASP)', icon: Beaker },
-    { id: 'clinical', label: 'Clinical Context (PICO)', icon: Users },
-    { id: 'evidence', label: 'Evidence (GRADE)', icon: FileText }
-  ];
+  const MissingOutcomesTab = () => (
+    <div className="space-y-6">
+      {/* Alert Header */}
+      <div className="bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-300 rounded-lg p-6">
+        <div className="flex items-start gap-4">
+          <ShieldAlert className="w-8 h-8 text-red-600 flex-shrink-0 mt-1" />
+          <div>
+            <h3 className="text-xl font-bold text-red-900 mb-2">Critical Evidence Gaps Identified</h3>
+            <p className="text-sm text-red-800 leading-relaxed">
+              The following outcomes and populations were not adequately addressed in this study, 
+              limiting the comprehensiveness of evidence and potential clinical applicability. 
+              These gaps represent important areas for future research.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Gap Categories */}
+      {data.missingOutcomes.map((category, idx) => (
+        <div key={idx} className={`border-2 rounded-lg p-6 ${getCriticalityColor(category.criticalityLevel)}`}>
+          <div className="flex items-start justify-between mb-4">
+            <h4 className="text-lg font-bold flex items-center gap-2">
+              <XCircle className="w-5 h-5" />
+              {category.category}
+            </h4>
+            <span className={`px-3 py-1 rounded-full text-xs font-bold border-2 
+              ${category.criticalityLevel === 'HIGH' ? 'bg-red-100 border-red-400 text-red-900' : 
+                category.criticalityLevel === 'MODERATE' ? 'bg-orange-100 border-orange-400 text-orange-900' : 
+                'bg-yellow-100 border-yellow-400 text-yellow-900'}`}>
+              {category.criticalityLevel} PRIORITY
+            </span>
+          </div>
+          <ul className="space-y-2">
+            {category.gaps.map((gap, gapIdx) => (
+              <li key={gapIdx} className="flex items-start gap-3 text-sm">
+                <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <span className="leading-relaxed">{gap}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+
+      {/* Summary Card */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <h4 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
+          <Target className="w-5 h-5" />
+          Implications for Future Research
+        </h4>
+        <p className="text-sm text-gray-700 leading-relaxed">
+          Addressing these gaps through well-designed, adequately powered studies with diverse populations 
+          and comprehensive outcome assessment will strengthen the evidence base and enable more confident 
+          clinical recommendations regarding artificial sweetener consumption and metabolic health.
+        </p>
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
@@ -491,7 +755,7 @@ const ResearchDashboard = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Research Analysis Dashboard</h1>
-          <p className="text-gray-600">CASP Critical Appraisal & Quality Assessment</p>
+          <p className="text-gray-600">Context-Aware Quality Assessment & Evidence Synthesis</p>
         </div>
 
         {/* Tabs */}
@@ -505,7 +769,7 @@ const ResearchDashboard = () => {
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center gap-2 px-6 py-4 font-medium text-sm transition-all ${
                     activeTab === tab.id
-                      ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700'
+                      ? `${currentTheme.bgColor} ${currentTheme.accentColor} border-b-2 ${currentTheme.borderColor}`
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                   }`}
                 >
@@ -520,13 +784,16 @@ const ResearchDashboard = () => {
         {/* Tab Content */}
         <div className="transition-all duration-300">
           {activeTab === 'overview' && <OverviewTab />}
-          {activeTab === 'methodology' && <MethodologyTab />}
-          {activeTab === 'clinical' && <ClinicalContextTab />}
-          {activeTab === 'evidence' && <EvidenceTab />}
+          {activeTab === 'pico' && <PICOTab />}
+          {activeTab === 'scope' && <PICOTab />}
+          {activeTab === 'casp' && <CASPTab />}
+          {activeTab === 'grade' && <GRADETab />}
+          {activeTab === 'evidence' && <GRADETab />}
+          {activeTab === 'missing' && <MissingOutcomesTab />}
         </div>
       </div>
     </div>
   );
 };
 
-export default ResearchDashboard;
+export default ContextAwareDashboard;
