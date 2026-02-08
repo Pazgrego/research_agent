@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Union
 from enum import Enum
 
 
@@ -298,7 +298,7 @@ class BenefitsHarmsQuestion(BaseModel):
     question: str
     answer: AnswerType
     details: BenefitsHarmsDetails
-    score: str
+    score: Union[str, float]  # Can be numeric score or "N/A"
     limitations_found: Optional[List[str]] = None
 
 
