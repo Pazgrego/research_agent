@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import List, Optional, Union
 from enum import Enum
 
@@ -31,6 +31,9 @@ class EffectSizeLevel(str, Enum):
     MODERATE = "MODERATE"
     SMALL = "SMALL"
     NONE = "NONE"
+    PARTIAL = "PARTIAL"
+    VARIES = "VARIES"
+    NOT_APPLICABLE = "NOT_APPLICABLE"
     UNCLEAR = "UNCLEAR"
 
 
@@ -38,6 +41,9 @@ class PrecisionLevel(str, Enum):
     HIGH = "HIGH"
     MODERATE = "MODERATE"
     LOW = "LOW"
+    PARTIAL = "PARTIAL"
+    VARIES = "VARIES"
+    NOT_APPLICABLE = "NOT_APPLICABLE"
     UNCLEAR = "UNCLEAR"
 
 
@@ -215,10 +221,18 @@ class EffectSizeDetails(BaseModel):
 
 class EffectSizeQuestion(BaseModel):
     question: str
-    answer: EffectSizeLevel
+    answer: str  # Use str instead of enum to accept any value including PARTIAL, VARIES
     details: EffectSizeDetails
     score: float
     limitations_found: Optional[List[str]] = None
+    
+    @field_validator('answer', mode='before')
+    @classmethod
+    def validate_answer(cls, v):
+        """Accept any string, suggest valid values in error messages"""
+        if isinstance(v, str):
+            return v.upper()  # Normalize to uppercase
+        return str(v)
 
 
 # Question 8: Precision
@@ -239,11 +253,19 @@ class PrecisionDetails(BaseModel):
 
 class PrecisionQuestion(BaseModel):
     question: str
-    answer: PrecisionLevel
+    answer: str  # Use str instead of enum to accept any value including PARTIAL, VARIES
     details: PrecisionDetails
     score: float
     concerns: List[str]
     limitations_found: Optional[List[str]] = None
+    
+    @field_validator('answer', mode='before')
+    @classmethod
+    def validate_answer(cls, v):
+        """Accept any string, suggest valid values in error messages"""
+        if isinstance(v, str):
+            return v.upper()  # Normalize to uppercase
+        return str(v)
 
 
 # Section B: Results
