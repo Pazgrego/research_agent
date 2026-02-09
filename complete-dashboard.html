@@ -3,627 +3,307 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Research Analysis Dashboard - Upload JSON</title>
+    <title>Research Analysis Dashboard</title>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        body { margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
-    </style>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useCallback } = React;
-        const { 
-            Award, Users, Beaker, FileText, Microscope, FlaskConical, ShieldAlert, 
-            AlertTriangle, CheckCircle, XCircle, Info, AlertCircle, Target, 
-            Upload, FileJson, X, HelpCircle
-        } = lucide;
+        const { useState } = React;
 
-        // Icon wrapper for Lucide
-        const Icon = ({ icon, className }) => {
-            return React.createElement(icon, { 
-                className, 
-                size: className?.includes('w-3') ? 12 : 
-                      className?.includes('w-4') ? 16 : 
-                      className?.includes('w-8') ? 32 : 20 
-            });
-        };
-
-        const ScientificDashboard = () => {
-            const [activeTab, setActiveTab] = useState('overview');
+        const Dashboard = () => {
             const [jsonData, setJsonData] = useState(null);
-            const [fileName, setFileName] = useState('');
-            const [uploadError, setUploadError] = useState(null);
-            const [isDragging, setIsDragging] = useState(false);
+            const [error, setError] = useState(null);
+            const [activeTab, setActiveTab] = useState('overview');
 
-            // Study configuration
-            const STUDY_CONFIG = {
-                ORIGINAL_ARTICLE: {
-                    theme: { bg: 'bg-blue-50', border: 'border-blue-300', text: 'text-blue-900', accent: 'text-blue-600' },
-                    tabs: [
-                        { id: 'overview', label: 'Overview', icon: Award },
-                        { id: 'pico', label: 'PICO Framework', icon: Users },
-                        { id: 'casp', label: 'CASP Evaluation', icon: Beaker },
-                        { id: 'grade', label: 'GRADE Assessment', icon: FileText },
-                        { id: 'gaps', label: 'Evidence Gaps', icon: AlertCircle }
-                    ]
-                },
-                SYSTEMATIC_REVIEW: {
-                    theme: { bg: 'bg-purple-50', border: 'border-purple-300', text: 'text-purple-900', accent: 'text-purple-600' },
-                    tabs: [
-                        { id: 'overview', label: 'Overview', icon: Award },
-                        { id: 'pico', label: 'PICO Framework', icon: Users },
-                        { id: 'prisma', label: 'PRISMA/AMSTAR', icon: Microscope },
-                        { id: 'grade', label: 'GRADE Assessment', icon: FileText },
-                        { id: 'gaps', label: 'Evidence Gaps', icon: AlertCircle }
-                    ]
-                },
-                NARRATIVE_REVIEW: {
-                    theme: { bg: 'bg-teal-50', border: 'border-teal-300', text: 'text-teal-900', accent: 'text-teal-600' },
-                    tabs: [
-                        { id: 'overview', label: 'Overview', icon: Award },
-                        { id: 'scope', label: 'Review Scope', icon: Users },
-                        { id: 'assessment', label: 'Quality Assessment', icon: Microscope },
-                        { id: 'evidence', label: 'Evidence Quality', icon: FileText },
-                        { id: 'gaps', label: 'Evidence Gaps', icon: AlertCircle }
-                    ]
-                }
-            };
-
-            // File upload handlers
-            const handleFileUpload = (file) => {
-                setUploadError(null);
-                
-                if (!file) {
-                    setUploadError('No file selected');
-                    return;
-                }
-
-                if (!file.name.endsWith('.json')) {
-                    setUploadError('Please upload a JSON file (.json)');
-                    return;
-                }
+            const handleFileUpload = (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
 
                 const reader = new FileReader();
-                
                 reader.onload = (e) => {
                     try {
                         const json = JSON.parse(e.target.result);
-                        
-                        // Basic validation
-                        if (!json.article_metadata) {
-                            setUploadError('Invalid JSON structure: missing article_metadata');
-                            return;
-                        }
-                        
                         setJsonData(json);
-                        setFileName(file.name);
-                        setActiveTab('overview');
-                        setUploadError(null);
-                    } catch (error) {
-                        setUploadError('Invalid JSON file: ' + error.message);
-                        setJsonData(null);
+                        setError(null);
+                    } catch (err) {
+                        setError('Invalid JSON: ' + err.message);
                     }
                 };
-
-                reader.onerror = () => {
-                    setUploadError('Error reading file. Please try again.');
-                };
-
                 reader.readAsText(file);
             };
 
-            const handleFileInput = (e) => {
-                const file = e.target.files?.[0];
-                if (file) handleFileUpload(file);
-            };
-
-            const handleDrop = useCallback((e) => {
-                e.preventDefault();
-                setIsDragging(false);
-                const file = e.dataTransfer.files?.[0];
-                if (file) handleFileUpload(file);
-            }, []);
-
-            const handleDragOver = useCallback((e) => {
-                e.preventDefault();
-                setIsDragging(true);
-            }, []);
-
-            const handleDragLeave = useCallback((e) => {
-                e.preventDefault();
-                setIsDragging(false);
-            }, []);
-
-            const clearData = () => {
-                setJsonData(null);
-                setFileName('');
-                setUploadError(null);
-                setActiveTab('overview');
-            };
-
-            // Utility functions
-            const detectStudyType = (metadata) => {
-                const studyTypeStr = (metadata?.study_type || '').toUpperCase();
-                if (studyTypeStr.includes('NARRATIVE')) return 'NARRATIVE_REVIEW';
-                if (studyTypeStr.includes('SYSTEMATIC')) return 'SYSTEMATIC_REVIEW';
-                return 'ORIGINAL_ARTICLE';
-            };
-
-            const normalizeAnswer = (answer) => {
-                if (!answer) return { value: 'N/A', type: 'not_available' };
-                const upper = String(answer).toUpperCase();
-                if (upper === 'YES') return { value: 'YES', type: 'positive' };
-                if (upper === 'NO') return { value: 'NO', type: 'negative' };
-                if (upper === 'PARTIAL') return { value: 'PARTIAL', type: 'partial' };
-                if (upper.includes('NOT_APPLICABLE') || upper === 'N/A') return { value: 'N/A', type: 'not_applicable' };
-                if (upper === 'UNCLEAR') return { value: 'UNCLEAR', type: 'unclear' };
-                return { value: String(answer), type: 'custom' };
-            };
-
-            const getAnswerBadgeStyle = (type) => {
-                const styles = {
-                    positive: 'bg-green-100 text-green-800 border-green-300',
-                    negative: 'bg-red-100 text-red-800 border-red-300',
-                    partial: 'bg-yellow-100 text-yellow-800 border-yellow-300',
-                    not_applicable: 'bg-gray-100 text-gray-500 border-gray-300',
-                    unclear: 'bg-orange-100 text-orange-800 border-orange-300',
-                    not_available: 'bg-gray-50 text-gray-400 border-gray-200'
-                };
-                return styles[type] || 'bg-blue-100 text-blue-800 border-blue-300';
-            };
-
-            const getQualityColor = (rating) => {
-                if (!rating) return 'text-gray-600 bg-gray-50 border-gray-200';
-                const upper = String(rating).toUpperCase();
-                const colors = {
-                    'HIGH': 'text-green-600 bg-green-50 border-green-200',
-                    'MODERATE': 'text-orange-600 bg-orange-50 border-orange-200',
-                    'LOW': 'text-red-600 bg-red-50 border-red-200',
-                    'VERY LOW': 'text-red-700 bg-red-100 border-red-300'
-                };
-                return colors[upper] || 'text-gray-600 bg-gray-50 border-gray-200';
-            };
-
-            const extractQuestions = (casp) => {
-                if (!casp) return [];
-                const questions = [];
-                ['section_a_validity', 'section_b_results'].forEach(section => {
-                    if (casp[section]) {
-                        Object.keys(casp[section]).forEach(key => {
-                            if (key.startsWith('question_') && casp[section][key].question) {
-                                questions.push({ 
-                                    ...casp[section][key], 
-                                    section: section.includes('validity') ? 'Validity' : 'Results' 
-                                });
-                            }
-                        });
-                    }
-                });
-                return questions;
-            };
-
-            // UI Components
-            const CircularProgress = ({ percentage }) => {
-                const safe = Number(percentage) || 0;
-                const radius = 60;
-                const circumference = 2 * Math.PI * radius;
-                const offset = circumference - (safe / 100) * circumference;
-                const color = safe >= 75 ? '#16a34a' : safe >= 50 ? '#ea580c' : '#dc2626';
-
-                return (
-                    <div className="relative inline-flex items-center justify-center">
-                        <svg width="140" height="140" className="transform -rotate-90">
-                            <circle cx="70" cy="70" r={radius} stroke="#e5e7eb" strokeWidth="10" fill="none" />
-                            <circle cx="70" cy="70" r={radius} stroke={color} strokeWidth="10" fill="none"
-                                strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round"
-                                className="transition-all duration-1000 ease-out" />
-                        </svg>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                            <span className="text-3xl font-bold" style={{ color }}>{safe}%</span>
-                            <span className="text-xs text-gray-500 uppercase">Quality</span>
-                        </div>
-                    </div>
-                );
-            };
-
-            const AnswerBadge = ({ answer }) => {
-                const norm = normalizeAnswer(answer);
-                return (
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getAnswerBadgeStyle(norm.type)}`}>
-                        {norm.value}
-                    </span>
-                );
-            };
-
             // Upload Screen
-            const UploadScreen = () => (
-                <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-                    <div className="max-w-2xl w-full">
-                        <div className="text-center mb-8">
-                            <h1 className="text-4xl font-bold text-gray-900 mb-3">Research Analysis Dashboard</h1>
-                            <p className="text-lg text-gray-600">Upload your CASP/GRADE evaluation JSON file to begin</p>
-                        </div>
-
-                        <div
-                            onDrop={handleDrop}
-                            onDragOver={handleDragOver}
-                            onDragLeave={handleDragLeave}
-                            className={`bg-white rounded-xl border-2 border-dashed p-12 text-center transition-all duration-200 ${
-                                isDragging 
-                                    ? 'border-blue-500 bg-blue-50 scale-105 shadow-lg' 
-                                    : 'border-gray-300 hover:border-gray-400 hover:shadow-md'
-                            }`}
-                        >
-                            <Icon icon={Upload} className={`w-20 h-20 mx-auto mb-4 transition-colors ${isDragging ? 'text-blue-500' : 'text-gray-400'}`} />
-                            
-                            <h3 className="text-2xl font-semibold text-gray-900 mb-2">
-                                {isDragging ? 'Drop your file here!' : 'Upload JSON File'}
-                            </h3>
-                            
-                            <p className="text-gray-600 mb-8 text-lg">
-                                Drag and drop your file here, or click to browse
-                            </p>
-
-                            <label className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 text-white text-lg font-medium rounded-lg hover:bg-blue-700 cursor-pointer transition-all shadow-md hover:shadow-lg">
-                                <Icon icon={FileJson} className="w-6 h-6" />
-                                Choose JSON File
-                                <input
-                                    type="file"
-                                    accept=".json,application/json"
-                                    onChange={handleFileInput}
-                                    className="hidden"
-                                />
-                            </label>
-
-                            {uploadError && (
-                                <div className="mt-6 p-4 bg-red-50 border-2 border-red-200 rounded-lg animate-pulse">
-                                    <div className="flex items-start gap-3">
-                                        <Icon icon={AlertTriangle} className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
-                                        <div className="text-left flex-1">
-                                            <p className="font-semibold text-red-900 mb-1">Upload Error</p>
-                                            <p className="text-sm text-red-700">{uploadError}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="mt-8 bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
-                            <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2 text-lg">
-                                <Icon icon={Info} className="w-5 h-5 text-blue-600" />
-                                Supported Study Types
-                            </h4>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div className="flex items-center gap-3 text-sm bg-blue-50 p-3 rounded-lg border border-blue-200">
-                                    <div className="w-4 h-4 rounded-full bg-blue-500 flex-shrink-0"></div>
-                                    <span className="font-medium">Original Articles</span>
-                                </div>
-                                <div className="flex items-center gap-3 text-sm bg-purple-50 p-3 rounded-lg border border-purple-200">
-                                    <div className="w-4 h-4 rounded-full bg-purple-500 flex-shrink-0"></div>
-                                    <span className="font-medium">Systematic Reviews</span>
-                                </div>
-                                <div className="flex items-center gap-3 text-sm bg-teal-50 p-3 rounded-lg border border-teal-200">
-                                    <div className="w-4 h-4 rounded-full bg-teal-500 flex-shrink-0"></div>
-                                    <span className="font-medium">Narrative Reviews</span>
-                                </div>
-                            </div>
-                            <p className="mt-4 text-sm text-gray-600">
-                                The dashboard automatically detects your study type and displays the appropriate evaluation framework.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            );
-
-            // Tab Components
-            const OverviewTab = () => {
-                const meta = jsonData?.article_metadata || {};
-                const assess = jsonData?.overall_assessment || {};
-
-                return (
-                    <div className="space-y-6">
-                        <div className="bg-white border rounded-lg p-6 shadow-sm">
-                            <div className="flex items-start gap-3 mb-4 flex-wrap">
-                                <h2 className="text-2xl font-bold text-gray-900 flex-1">{meta.title || 'No Title'}</h2>
-                                <div className={`px-4 py-2 rounded-lg border-2 ${theme.bg} ${theme.border} shadow-sm`}>
-                                    <div className="flex items-center gap-2">
-                                        <Icon icon={FlaskConical} className={`w-5 h-5 ${theme.accent}`} />
-                                        <div>
-                                            <div className="text-xs text-gray-600 uppercase">Study Type</div>
-                                            <div className={`text-sm font-bold ${theme.text}`}>{meta.study_type || 'Unknown'}</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                                {meta.journal && <div><span className="text-gray-500">Journal:</span> <span className="ml-2 font-medium">{meta.journal}</span></div>}
-                                {meta.publication_year && <div><span className="text-gray-500">Year:</span> <span className="ml-2 font-medium">{meta.publication_year}</span></div>}
-                                {meta.doi && <div><span className="text-gray-500">DOI:</span> <span className="ml-2 font-medium text-blue-600">{meta.doi}</span></div>}
-                            </div>
-                        </div>
-
-                        <div className="bg-white border rounded-lg p-6 shadow-sm">
-                            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                                <div className="flex-1">
-                                    <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                                        <Icon icon={Award} className="w-5 h-5 text-orange-600" />
-                                        Overall Quality Assessment
-                                    </h3>
-                                    {assess.quality_rating && (
-                                        <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border-2 mb-3 ${getQualityColor(assess.quality_rating)}`}>
-                                            <span className="text-sm font-bold uppercase">{assess.quality_rating} Quality</span>
-                                        </div>
-                                    )}
-                                    {assess.total_score !== undefined && (
-                                        <p className="text-sm text-gray-600">Score: {assess.total_score} / {assess.total_applicable_questions}</p>
-                                    )}
-                                </div>
-                                {assess.percentage_score !== undefined && <CircularProgress percentage={assess.percentage_score} />}
-                            </div>
-                        </div>
-
-                        {assess.scientific_justification && (
-                            <div className="bg-gradient-to-br from-indigo-50 to-blue-50 border-2 border-indigo-200 rounded-lg p-6 shadow-sm">
-                                <h3 className="text-lg font-semibold text-indigo-900 mb-4 flex items-center gap-2">
-                                    <Icon icon={Info} className="w-5 h-5 text-indigo-600" />
-                                    Scientific Justification
-                                </h3>
-                                <div className="bg-white rounded-lg p-4 border border-indigo-100">
-                                    <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{assess.scientific_justification}</p>
-                                </div>
-                            </div>
-                        )}
-
-                        {assess.reliability_conclusion && (
-                            <div className="bg-white border rounded-lg p-6 shadow-sm">
-                                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                                    <Icon icon={Target} className="w-5 h-5 text-blue-600" />
-                                    Conclusion
-                                </h3>
-                                <p className="text-sm text-gray-700 leading-relaxed">{assess.reliability_conclusion}</p>
-                            </div>
-                        )}
-
-                        {(assess.key_strengths?.length > 0 || assess.key_limitations?.length > 0) && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {assess.key_strengths?.length > 0 && (
-                                    <div className="bg-white border rounded-lg p-6 shadow-sm">
-                                        <h4 className="font-semibold text-sm text-green-700 mb-3 flex items-center gap-2">
-                                            <Icon icon={CheckCircle} className="w-5 h-5" />
-                                            Strengths ({assess.key_strengths.length})
-                                        </h4>
-                                        <ul className="space-y-2">
-                                            {assess.key_strengths.map((s, i) => (
-                                                <li key={i} className="text-sm text-gray-700 flex gap-2">
-                                                    <span className="text-green-600 font-bold">•</span>
-                                                    <span>{s}</span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
-                                {assess.key_limitations?.length > 0 && (
-                                    <div className="bg-white border rounded-lg p-6 shadow-sm">
-                                        <h4 className="font-semibold text-sm text-red-700 mb-3 flex items-center gap-2">
-                                            <Icon icon={AlertTriangle} className="w-5 h-5" />
-                                            Limitations ({assess.key_limitations.length})
-                                        </h4>
-                                        <ul className="space-y-2">
-                                            {assess.key_limitations.map((l, i) => (
-                                                <li key={i} className="text-sm text-gray-700 flex gap-2">
-                                                    <span className="text-red-600 font-bold">•</span>
-                                                    <span>{l}</span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                    </div>
-                );
-            };
-
-            const ScopeTab = () => {
-                const pico = jsonData?.casp_evaluation?.section_a_validity?.question_1_focused_issue?.details;
-                if (!pico) {
-                    return (
-                        <div className="bg-white border rounded-lg p-12 text-center shadow-sm">
-                            <Icon icon={HelpCircle} className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                            <p className="text-gray-500 text-lg">PICO data not available in this evaluation</p>
-                        </div>
-                    );
-                }
-
-                return (
-                    <div className="bg-white border rounded-lg p-6 shadow-sm">
-                        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                            <Icon icon={Users} className="w-5 h-5 text-blue-600" />
-                            PICO Framework
-                        </h3>
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                            {pico.population && (
-                                <div className="border-2 border-blue-200 rounded-lg p-4 bg-blue-50">
-                                    <h4 className="font-semibold text-sm text-blue-900 mb-2">Population</h4>
-                                    <p className="text-sm text-gray-700 leading-relaxed">{pico.population}</p>
-                                </div>
-                            )}
-                            {pico.intervention && (
-                                <div className="border-2 border-green-200 rounded-lg p-4 bg-green-50">
-                                    <h4 className="font-semibold text-sm text-green-900 mb-2">Intervention</h4>
-                                    <p className="text-sm text-gray-700 leading-relaxed">{pico.intervention}</p>
-                                </div>
-                            )}
-                            {pico.comparator && (
-                                <div className="border-2 border-purple-200 rounded-lg p-4 bg-purple-50">
-                                    <h4 className="font-semibold text-sm text-purple-900 mb-2">Comparator</h4>
-                                    <p className="text-sm text-gray-700 leading-relaxed">{pico.comparator}</p>
-                                </div>
-                            )}
-                            {pico.outcomes && (
-                                <div className="border-2 border-orange-200 rounded-lg p-4 bg-orange-50">
-                                    <h4 className="font-semibold text-sm text-orange-900 mb-2">Outcomes</h4>
-                                    <p className="text-sm text-gray-700 leading-relaxed">{pico.outcomes}</p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                );
-            };
-
-            const AssessmentTab = () => {
-                const questions = extractQuestions(jsonData?.casp_evaluation);
-                if (questions.length === 0) {
-                    return (
-                        <div className="bg-white border rounded-lg p-12 text-center shadow-sm">
-                            <Icon icon={HelpCircle} className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                            <p className="text-gray-500 text-lg">No assessment data available</p>
-                        </div>
-                    );
-                }
-
-                return (
-                    <div className="bg-white border rounded-lg p-6 shadow-sm">
-                        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                            <Icon icon={Microscope} className="w-5 h-5 text-purple-600" />
-                            Quality Assessment
-                        </h3>
-                        <div className="space-y-3">
-                            {questions.map((q, i) => (
-                                <div key={i} className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-all hover:shadow-sm">
-                                    <div className="flex justify-between gap-4 mb-2">
-                                        <div className="flex-1">
-                                            <p className="text-sm font-medium text-gray-900">{q.question}</p>
-                                            {q.section && <span className="text-xs text-gray-500 mt-1 inline-block">Section: {q.section}</span>}
-                                        </div>
-                                        <AnswerBadge answer={q.answer} />
-                                    </div>
-                                    {q.notes && <p className="text-xs text-gray-600 bg-gray-50 p-2 rounded mt-2 leading-relaxed">{q.notes}</p>}
-                                    {q.concerns && q.concerns.length > 0 && (
-                                        <div className="mt-2 flex gap-2 text-xs text-red-700 bg-red-50 p-2 rounded">
-                                            <Icon icon={AlertTriangle} className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                                            <span className="leading-relaxed">{q.concerns[0]}</span>
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                );
-            };
-
-            const GapsTab = () => {
-                const gaps = jsonData?.overall_assessment?.what_was_not_considered || [];
-                
-                return (
-                    <div className="space-y-6">
-                        <div className="bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-300 rounded-lg p-6 shadow-md">
-                            <div className="flex gap-4">
-                                <Icon icon={ShieldAlert} className="w-10 h-10 text-red-600 mt-1 flex-shrink-0" />
-                                <div>
-                                    <h3 className="text-2xl font-bold text-red-900 mb-2">Critical Evidence Gaps Identified</h3>
-                                    <p className="text-sm text-red-800">Areas not adequately addressed in this study, limiting evidence comprehensiveness.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {gaps.length > 0 ? (
-                            <div className="border-2 border-orange-300 bg-orange-50 text-orange-900 rounded-lg p-6 shadow-sm">
-                                <h4 className="text-lg font-bold mb-4 flex items-center gap-2">
-                                    <Icon icon={XCircle} className="w-6 h-6" />
-                                    What Was Not Considered ({gaps.length} items)
-                                </h4>
-                                <ul className="space-y-3">
-                                    {gaps.map((gap, i) => (
-                                        <li key={i} className="flex gap-3 text-sm leading-relaxed">
-                                            <Icon icon={AlertTriangle} className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                                            <span>{gap}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        ) : (
-                            <div className="bg-white border rounded-lg p-12 text-center shadow-sm">
-                                <Icon icon={CheckCircle} className="w-16 h-16 mx-auto mb-4 text-green-400" />
-                                <p className="text-gray-600 text-lg">No evidence gaps documented in this evaluation</p>
-                            </div>
-                        )}
-                    </div>
-                );
-            };
-
-            // Main render
             if (!jsonData) {
-                return <UploadScreen />;
+                return (
+                    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-8">
+                        <div className="max-w-2xl w-full">
+                            <div className="text-center mb-8">
+                                <h1 className="text-4xl font-bold text-gray-900 mb-3">
+                                    📊 Research Analysis Dashboard
+                                </h1>
+                                <p className="text-lg text-gray-600">
+                                    Upload your JSON analysis file to visualize results
+                                </p>
+                            </div>
+
+                            <div className="bg-white rounded-xl border-2 border-dashed border-gray-300 p-12 text-center hover:border-blue-400 transition-all">
+                                <div className="text-6xl mb-4">📁</div>
+                                <h3 className="text-2xl font-semibold text-gray-900 mb-4">
+                                    Upload JSON File
+                                </h3>
+                                <p className="text-gray-600 mb-6">
+                                    Click below to select your analysis file
+                                </p>
+
+                                <label className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 text-white text-lg font-medium rounded-lg hover:bg-blue-700 cursor-pointer shadow-lg">
+                                    📄 Choose JSON File
+                                    <input
+                                        type="file"
+                                        accept=".json"
+                                        onChange={handleFileUpload}
+                                        className="hidden"
+                                    />
+                                </label>
+
+                                {error && (
+                                    <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                                        <p className="text-red-900 font-semibold">⚠️ {error}</p>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="mt-8 bg-white rounded-xl p-6 border border-gray-200">
+                                <h4 className="font-semibold text-gray-900 mb-4">
+                                    ℹ️ Supported Study Types
+                                </h4>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                                    <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                                        🔬 Original Articles
+                                    </div>
+                                    <div className="bg-purple-50 p-3 rounded-lg border border-purple-200">
+                                        📚 Systematic Reviews
+                                    </div>
+                                    <div className="bg-teal-50 p-3 rounded-lg border border-teal-200">
+                                        📖 Narrative Reviews
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
             }
 
-            const studyType = detectStudyType(jsonData.article_metadata);
-            const config = STUDY_CONFIG[studyType] || STUDY_CONFIG.ORIGINAL_ARTICLE;
-            const theme = config.theme;
+            // Extract data
+            const meta = jsonData.article_metadata || {};
+            const assess = jsonData.overall_assessment || {};
+            const casp = jsonData.casp_evaluation || {};
 
+            // Get PICO data
+            const pico = casp.section_a_validity?.question_1_focused_issue?.details || {};
+
+            // Extract CASP questions
+            const questions = [];
+            ['section_a_validity', 'section_b_results'].forEach(section => {
+                if (casp[section]) {
+                    Object.keys(casp[section]).forEach(key => {
+                        if (key.startsWith('question_') && casp[section][key].question) {
+                            questions.push({
+                                ...casp[section][key],
+                                section: section.includes('validity') ? 'Validity' : 'Results'
+                            });
+                        }
+                    });
+                }
+            });
+
+            const getQualityColor = (rating) => {
+                const colors = {
+                    'HIGH': 'bg-green-50 text-green-800 border-green-300',
+                    'MODERATE': 'bg-orange-50 text-orange-800 border-orange-300',
+                    'LOW': 'bg-red-50 text-red-800 border-red-300'
+                };
+                return colors[rating?.toUpperCase()] || 'bg-gray-50 text-gray-800 border-gray-300';
+            };
+
+            const getAnswerColor = (answer) => {
+                const colors = {
+                    'YES': 'bg-green-100 text-green-800',
+                    'NO': 'bg-red-100 text-red-800',
+                    'PARTIAL': 'bg-yellow-100 text-yellow-800'
+                };
+                return colors[answer?.toUpperCase()] || 'bg-gray-100 text-gray-800';
+            };
+
+            // Dashboard with tabs
             return (
-                <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+                <div className="min-h-screen bg-gray-50 p-8">
                     <div className="max-w-6xl mx-auto">
                         {/* Header */}
-                        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-                            <div className="flex-1">
-                                <h1 className="text-3xl font-bold text-gray-900 mb-2">Research Analysis Dashboard</h1>
-                                <div className="flex items-center gap-2 text-sm text-gray-600">
-                                    <Icon icon={FileJson} className="w-4 h-4 text-blue-600" />
-                                    <span className="font-medium">Loaded: {fileName}</span>
-                                </div>
+                        <div className="mb-6 flex justify-between items-center">
+                            <div>
+                                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                                    📊 Research Analysis Dashboard
+                                </h1>
+                                <p className="text-gray-600">Analysis results visualization</p>
                             </div>
                             <button
-                                onClick={clearData}
-                                className="flex items-center gap-2 px-5 py-3 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 border-2 border-red-200 transition-all shadow-sm hover:shadow font-medium"
+                                onClick={() => setJsonData(null)}
+                                className="px-6 py-3 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 border border-red-200 font-medium"
                             >
-                                <Icon icon={X} className="w-5 h-5" />
-                                Clear & Upload New
+                                ✖️ Upload New File
                             </button>
                         </div>
 
                         {/* Tabs */}
-                        <div className="bg-white border rounded-lg mb-6 overflow-hidden shadow-sm">
-                            <div className="flex flex-wrap border-b">
-                                {config.tabs.map(tab => (
-                                    <button 
-                                        key={tab.id} 
-                                        onClick={() => setActiveTab(tab.id)}
-                                        className={`flex items-center gap-2 px-6 py-4 font-medium text-sm transition-all ${
-                                            activeTab === tab.id 
-                                                ? `${theme.bg} ${theme.accent} border-b-2 ${theme.border}` 
-                                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                        <div className="bg-white border rounded-lg mb-6 overflow-hidden">
+                            <div className="flex border-b">
+                                {['overview', 'pico', 'casp', 'details'].map(tab => (
+                                    <button
+                                        key={tab}
+                                        onClick={() => setActiveTab(tab)}
+                                        className={`px-6 py-4 font-medium transition-all ${
+                                            activeTab === tab
+                                                ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600'
+                                                : 'text-gray-600 hover:bg-gray-50'
                                         }`}
                                     >
-                                        <Icon icon={tab.icon} className="w-4 h-4" />
-                                        {tab.label}
+                                        {tab.charAt(0).toUpperCase() + tab.slice(1)}
                                     </button>
                                 ))}
                             </div>
                         </div>
 
                         {/* Tab Content */}
-                        <div className="transition-all duration-300">
-                            {activeTab === 'overview' && <OverviewTab />}
-                            {(activeTab === 'pico' || activeTab === 'scope') && <ScopeTab />}
-                            {(activeTab === 'casp' || activeTab === 'assessment' || activeTab === 'prisma') && <AssessmentTab />}
-                            {(activeTab === 'grade' || activeTab === 'evidence') && <OverviewTab />}
-                            {activeTab === 'gaps' && <GapsTab />}
-                        </div>
+                        {activeTab === 'overview' && (
+                            <div className="space-y-6">
+                                {/* Study Info */}
+                                <div className="bg-white border rounded-lg p-6">
+                                    <h2 className="text-2xl font-bold mb-4">{meta.title || 'Study Title'}</h2>
+                                    <div className="grid grid-cols-3 gap-4 text-sm">
+                                        <div><span className="text-gray-500">Journal:</span> <strong>{meta.journal}</strong></div>
+                                        <div><span className="text-gray-500">Year:</span> <strong>{meta.publication_year}</strong></div>
+                                        <div><span className="text-gray-500">DOI:</span> <strong className="text-blue-600">{meta.doi}</strong></div>
+                                    </div>
+                                </div>
+
+                                {/* Quality Score */}
+                                <div className="bg-white border rounded-lg p-6">
+                                    <h3 className="text-xl font-bold mb-4">🏆 Overall Quality Assessment</h3>
+                                    <div className="flex items-center gap-6">
+                                        <div className="text-center">
+                                            <div className="text-5xl font-bold text-blue-600 mb-2">
+                                                {assess.percentage_score || 0}%
+                                            </div>
+                                            <div className={`inline-block px-4 py-2 rounded-full border-2 font-bold ${getQualityColor(assess.quality_rating)}`}>
+                                                {assess.quality_rating || 'N/A'}
+                                            </div>
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-gray-600 mb-2">
+                                                Score: <strong>{assess.total_score} / {assess.total_applicable_questions}</strong>
+                                            </p>
+                                            {assess.reliability_conclusion && (
+                                                <p className="text-sm text-gray-700 leading-relaxed">
+                                                    {assess.reliability_conclusion}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Strengths & Limitations */}
+                                <div className="grid grid-cols-2 gap-6">
+                                    {assess.key_strengths?.length > 0 && (
+                                        <div className="bg-white border rounded-lg p-6">
+                                            <h4 className="font-bold text-green-700 mb-3">✅ Strengths</h4>
+                                            <ul className="space-y-2">
+                                                {assess.key_strengths.map((s, i) => (
+                                                    <li key={i} className="text-sm text-gray-700">• {s}</li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+                                    {assess.key_limitations?.length > 0 && (
+                                        <div className="bg-white border rounded-lg p-6">
+                                            <h4 className="font-bold text-red-700 mb-3">⚠️ Limitations</h4>
+                                            <ul className="space-y-2">
+                                                {assess.key_limitations.map((l, i) => (
+                                                    <li key={i} className="text-sm text-gray-700">• {l}</li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'pico' && (
+                            <div className="bg-white border rounded-lg p-6">
+                                <h3 className="text-xl font-bold mb-4">🎯 PICO Framework</h3>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="border-2 border-blue-200 rounded-lg p-4 bg-blue-50">
+                                        <h4 className="font-bold text-blue-900 mb-2">Population</h4>
+                                        <p className="text-sm text-gray-700">{pico.population || 'Not specified'}</p>
+                                    </div>
+                                    <div className="border-2 border-green-200 rounded-lg p-4 bg-green-50">
+                                        <h4 className="font-bold text-green-900 mb-2">Intervention</h4>
+                                        <p className="text-sm text-gray-700">{pico.intervention || 'Not specified'}</p>
+                                    </div>
+                                    <div className="border-2 border-purple-200 rounded-lg p-4 bg-purple-50">
+                                        <h4 className="font-bold text-purple-900 mb-2">Comparator</h4>
+                                        <p className="text-sm text-gray-700">{pico.comparator || 'Not specified'}</p>
+                                    </div>
+                                    <div className="border-2 border-orange-200 rounded-lg p-4 bg-orange-50">
+                                        <h4 className="font-bold text-orange-900 mb-2">Outcomes</h4>
+                                        <p className="text-sm text-gray-700">{pico.outcomes || 'Not specified'}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'casp' && (
+                            <div className="bg-white border rounded-lg p-6">
+                                <h3 className="text-xl font-bold mb-4">🔬 CASP Assessment</h3>
+                                <div className="space-y-3">
+                                    {questions.map((q, i) => (
+                                        <div key={i} className="border rounded-lg p-4">
+                                            <div className="flex justify-between gap-4 mb-2">
+                                                <p className="text-sm font-medium flex-1">{q.question}</p>
+                                                <span className={`px-3 py-1 rounded-full text-xs font-bold ${getAnswerColor(q.answer)}`}>
+                                                    {q.answer}
+                                                </span>
+                                            </div>
+                                            {q.notes && (
+                                                <p className="text-xs text-gray-600 bg-gray-50 p-2 rounded mt-2">
+                                                    {q.notes}
+                                                </p>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'details' && (
+                            <div className="bg-white border rounded-lg p-6">
+                                <h3 className="text-xl font-bold mb-4">📄 Raw Data</h3>
+                                <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-auto text-xs">
+                                    {JSON.stringify(jsonData, null, 2)}
+                                </pre>
+                            </div>
+                        )}
                     </div>
                 </div>
             );
         };
 
-        // Render app
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<ScientificDashboard />);
+        root.render(<Dashboard />);
     </script>
 </body>
 </html>
