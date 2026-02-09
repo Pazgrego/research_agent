@@ -213,9 +213,9 @@ class HumanOutcomeMeasurement(BaseModel):
 
 
 class EffectSizeDetails(BaseModel):
-    primary_outcome_mice: OutcomeMeasurement
-    primary_outcome_humans: HumanOutcomeMeasurement
-    mechanistic_outcomes: MechanisticOutcomes
+    primary_outcome_mice: Union[OutcomeMeasurement, str]  # Allow string for systematic reviews
+    primary_outcome_humans: Union[HumanOutcomeMeasurement, str]  # Allow string for systematic reviews
+    mechanistic_outcomes: Union[MechanisticOutcomes, str]  # Allow string for systematic reviews
     limitations_found: Optional[List[str]] = None
 
 
@@ -366,7 +366,7 @@ class ExternalValidity(BaseModel):
 
 
 class StatisticalRigor(BaseModel):
-    appropriate_tests: Optional[bool] = None
+    appropriate_tests: Optional[Union[bool, str]] = None  # Can be bool or "UNCLEAR"/"N/A"
     multiple_testing_correction: Optional[str] = None
     sample_size_justification: Optional[str] = None
     power_calculation: Optional[str] = None
